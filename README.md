@@ -25,3 +25,13 @@ pnpm run build
 ```sh
 pnpm run preview
 ```
+
+## 아키텍쳐
+
+```mermaid
+graph LR
+    blogList --> main
+    header --> main
+    post --> blogList
+    markdownToHtml --> post
+```
