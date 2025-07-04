@@ -1,6 +1,4 @@
 import "./style.css";
-// import readme from "../README.md?raw";
-// import test from "./test.md?raw";
 
 import { unified } from "unified";
 import markdown from "remark-parse";
@@ -21,16 +19,31 @@ const markdownToHtml = (markdownSource: string) => {
   return "";
 };
 
+const blogList = () => {
+  const ul = document.createElement("ul");
+
+  const modules = import.meta.glob(`../content/**/**.md`, { eager: true });
+
+  for (const path in modules) {
+    const li = document.createElement("li");
+
+    const blogLink = document.createElement("a");
+    blogLink.innerText = path;
+    blogLink.href = path;
+    li.appendChild(blogLink);
+
+    ul.appendChild(li);
+  }
+
+  return ul;
+};
+
 const main = async () => {
   const readme = await import("../content/2025-07-02/2025-07-02-page.md?raw");
 
   const app = document.querySelector<HTMLDivElement>("#app");
 
   if (app) {
-    const button = document.createElement("button");
-    button.textContent = "hello old school";
-    app.appendChild(button);
-
     const markdownContainer = document.createElement("div");
     markdownContainer.classList.add("markdown-body");
     markdownContainer.insertAdjacentHTML(
@@ -39,6 +52,7 @@ const main = async () => {
     );
 
     app.appendChild(markdownContainer);
+    app.appendChild(blogList());
   }
 };
 
