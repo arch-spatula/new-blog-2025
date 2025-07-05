@@ -1,3 +1,8 @@
+/**
+ * @todo link 생성은 content를 의존해서 만들지 말기
+ *   - 1안 public 내 blog html 파일들을 기준으로 생성하기
+ *   - 2안 빌드 스텝에 마크다운 파일들에 대한 정보를 json으로 만들기
+ */
 const blogList = () => {
   const ul = document.createElement("ul");
 
@@ -7,21 +12,14 @@ const blogList = () => {
     const li = document.createElement("li");
 
     const blogLink = document.createElement("a");
-    blogLink.innerText = path.slice(3);
-    blogLink.href = path.slice(3);
 
-    blogLink.addEventListener("click", (event) => {
-      event.preventDefault(); // 기본 동작 차단 (페이지 이동 방지)
+    const newPath = path
+      .replace("content", "blog")
+      .replace(/\.md$/, ".html")
+      .replace("../", "");
 
-      const url = (event.target as HTMLAnchorElement).href;
-      console.log(url);
-
-      // URL 변경 (History API 사용)
-      window.history.pushState({}, "", url);
-
-      // URL 상태 접근
-      console.log("New pathname:", window.location.pathname);
-    });
+    blogLink.innerText = newPath;
+    blogLink.href = newPath;
 
     li.appendChild(blogLink);
 

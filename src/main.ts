@@ -8,6 +8,10 @@ const main = async () => {
 
   const app = document.querySelector<HTMLDivElement>("#app");
 
+  // const testData = await fetch("blog/test.json");
+  // const bar = await testData.json();
+  // console.log(bar);
+
   if (app) {
     const markdownContainer = document.createElement("div");
     markdownContainer.classList.add("markdown-body");
