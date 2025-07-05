@@ -9,12 +9,23 @@ export default defineConfig(async ({}) => {
         name: "complel markdown to html when dev start",
         async configureServer({}) {
           console.log("🚀 configureServer 실행됨!");
-          generate();
+          try {
+            generate(__dirname);
+          } catch (err) {
+            console.error(err);
+            console.log("vite generate 실패");
+          }
         },
+
         // vite build 전에 실행
         async buildStart() {
           if (process.env.NODE_ENV === "production") {
-            generate();
+            try {
+              generate(__dirname);
+            } catch (err) {
+              console.error(err);
+              console.log("vite generate 실패");
+            }
           }
         },
       },

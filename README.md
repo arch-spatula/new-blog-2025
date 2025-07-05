@@ -28,10 +28,19 @@ pnpm run preview
 
 ## 아키텍쳐
 
+### 빌드
+
 ```mermaid
 graph LR
-    blogList --> main
-    header --> main
-    post --> blogList
-    markdownToHtml --> post
+    findMarkdownFiles --> generate
+    markdownToHtml --> generate
+```
+
+### 사이트맵
+
+```mermaid
+graph LR
+    root --> post
+    root --> tags
+    root --> search
 ```
