@@ -1,26 +1,22 @@
 import "./style.css";
 
 import blogList from "./blogList";
-import markdownToHtml from "./markdownToHtml";
+// import markdownToHtml from "./markdownToHtml";
 
 const main = async () => {
-  const readme = await import("../content/2025-07-02/2025-07-02-page.md?raw");
+  // const readme = await import("../content/2025-07-02/2025-07-02-page.md?raw");
 
   const app = document.querySelector<HTMLDivElement>("#app");
 
-  // const testData = await fetch("blog/test.json");
-  // const bar = await testData.json();
-  // console.log(bar);
-
   if (app) {
-    const markdownContainer = document.createElement("div");
-    markdownContainer.classList.add("markdown-body");
-    markdownContainer.insertAdjacentHTML(
-      "beforeend",
-      markdownToHtml(readme.default),
-    );
+    // const markdownContainer = document.createElement("div");
+    // markdownContainer.classList.add("markdown-body");
+    // markdownContainer.insertAdjacentHTML(
+    //   "beforeend",
+    //   markdownToHtml(readme.default),
+    // );
 
-    app.appendChild(markdownContainer);
+    // app.appendChild(markdownContainer);
     app.appendChild(blogList());
   }
 };
