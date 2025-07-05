@@ -3,6 +3,10 @@ import * as fs from "fs";
 import findMarkdownFiles from "./findMarkdownFiles";
 import markdownToHtml from "./markdownToHtml";
 
+/** 
+ * @todo html을 생성하는 로직에 index.json을 접근할 수 있는 로직도 만들기
+ * @todo html용 header 및 markdown-body로 감싸기  
+ */
 const generate = () => {
   const srcDir = path.resolve(__dirname, "content"); // *.md 모아둔 곳
   const outDir = path.resolve(__dirname, "public/blog");

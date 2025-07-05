@@ -1,7 +1,6 @@
 /**
  * @todo link 생성은 content를 의존해서 만들지 말기
- *   - 1안 public 내 blog html 파일들을 기준으로 생성하기
- *   - 2안 빌드 스텝에 마크다운 파일들에 대한 정보를 json으로 만들기
+ *   - 빌드 스텝에 마크다운 파일들에 대한 정보를 json으로 만들기
  */
 const blogList = () => {
   const ul = document.createElement("ul");
