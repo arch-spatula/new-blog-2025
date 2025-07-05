@@ -4,7 +4,6 @@ import remark2rehype from "remark-rehype";
 import html from "rehype-stringify";
 
 /**
- * 아직 남겨둔 이유는 혹시 마크다운 파일을 처리해야 할 수 있어서 남겨 둠.
  * @todo 메타정보 파싱하기
  *   - `---\n`으로 시작하고 `---\n`으로 끝나는 텍스트내의 자료 활용하기
  *     - 문서 전체에서 첫 `---\n`으로 시작하고 `---\n` 끝나는 경우만 해당해야 함.

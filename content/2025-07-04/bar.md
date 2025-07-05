@@ -1,11 +1,3 @@
----
-title: 원티드 프리온보딩 과제 - 8일차
-authors: [arch-spatula]
-tags: ['button', 'wanted', 'pre-on-boarding']
-description: 원티드 과제 진행과정
-date: 2023-04-16
----
-
 # 원티드 프리온보딩 과제 - 8일차
 
 <!--truncate-->
@@ -19,13 +11,13 @@ date: 2023-04-16
 > `React.ButtonHTMLAttributes<HTMLButtonElement>.type?: "button" | "reset" | "submit" | undefined`에서 `"button" | "reset" | "submit" | undefined`을 추출하고 싶습니다
 
 ```tsx
-import { ButtonHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes } from "react";
 
 interface CustomButtonProps {
   text: string;
-  hierarchy: 'primary' | 'secondary';
+  hierarchy: "primary" | "secondary";
   href?: string;
-  customType?: ButtonHTMLAttributes<HTMLButtonElement>['type'];
+  customType?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
   onClick?: () => void;
   testId?: string;
   disabled?: boolean;
