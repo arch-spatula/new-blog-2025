@@ -25,3 +25,22 @@ pnpm run build
 ```sh
 pnpm run preview
 ```
+
+## 아키텍쳐
+
+### 빌드
+
+```mermaid
+graph LR
+    findMarkdownFiles --> generate
+    markdownToHtml --> generate
+```
+
+### 사이트맵
+
+```mermaid
+graph LR
+    root --> post
+    root --> tags
+    root --> search
+```
