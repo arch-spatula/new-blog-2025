@@ -1,5 +1,7 @@
 # 필요하면 아래 주석 해제하기 
 public/blog/*
+public/data.json
+
 # Logs
 logs
 *.log

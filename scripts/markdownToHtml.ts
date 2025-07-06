@@ -50,7 +50,7 @@ type MarkdownResult = {
    * 마크다운을 html 표시할 문자열로 변환 문자열
    */
   content: string;
-  mete: MetaObject;
+  meta: MetaObject;
 };
 const markdownToMeta = async (
   markdownSource: string,
@@ -114,14 +114,13 @@ const markdownToMeta = async (
             console.warn("허용한 하지 않은 키입니다.");
             throw new Error("허용한 하지 않은 키입니다.");
         }
-        return { mete: result, content: content };
       }
     } catch (err) {
       console.error(`유효하지 않은 형식입니다.\n${err}`);
-      return { mete: { title: "" }, content: "" };
+      return { meta: { title: "" }, content: "" };
     }
 
-    if (result.title) return { mete: result, content: content };
+    if (result.title) return { meta: result, content: content };
   }
 
   /**
@@ -132,27 +131,92 @@ const markdownToMeta = async (
 
   const title = markdownSource.match(fromMarkdownTitle);
   if (title) {
-    return { mete: { title: title[0].slice(2) }, content: markdownSource };
+    return {
+      meta: {
+        // title만 빠진 경우에도 meta정보 제공
+        ...result,
+        title: title[0].slice(2),
+      },
+      content: markdownSource,
+    };
   }
 
   /**
    * 제목도 작성 안 하는 막장은 굳이 보여주지 않음.
    * 콘솔에 경고 보여주고 다음 파일로 넘어가도록 함.
    */
-  return { mete: { title: "" }, content: "" };
+  return { meta: { title: "" }, content: "" };
+};
+
+type Token =
+  | { title: string }
+  | { date: string }
+  | { draft: boolean }
+  | { tags: string[] };
+
+const lexer = (): Token => {
+  return { title: "" };
+};
+
+/**
+ * 메타 정보 여부만 판단해야 함.
+ */
+const scanner = (markdownSource: string) => {
+  /**
+   * ---
+   * title: "My Blog Post"
+   * date: "2025-07-05"
+   * tags: ["vite", "markdown"]
+   * ---
+   *
+   * # foo
+   *
+   * - hello foo
+   *
+   *   위에서 `---\n` 부터 `---\n`까지 사이 텍스트를 선택할 때 활용함.
+   */
+  const metaInfo = /^---\n([\s\S]*?)\n---\n?/;
+
+  const matchMeta = markdownSource.match(metaInfo);
+
+  if (matchMeta) {
+    const metaDataString = matchMeta[1]; // YAML 부분 (string)
+    // console.log(metaDataString);
+
+    return;
+  }
+
+  /**
+   * - `---\n`, `---\n` 사이에 메타 정보 작성 안해도 제목은 작성함.
+   *   - `---\n`, `---\n` 사이에 title이 없는 경우 문서의 가장 먼저 오는 heading 1을 활용함.
+   * - `# 이런저런 제목\n` 같은 형식을 찾아보고 title로 간주함.
+   */
+  const fromMarkdownTitle = /^# (.+)$/m;
+
+  const matchH1Title = markdownSource.match(fromMarkdownTitle);
+
+  if (matchH1Title) {
+    //
+    return;
+  }
+
+  console.warn("블로그 글에 제목이 없을 수 없습니다.");
 };
 
 /**
  * - 의사결정 트리 표현이 상당히 엉성한 상태
+ *   - lexing, scanning 결정이 필요함.
+ *   - token을 만들고 ast 흉내를 내야함.
  */
 const compileMarkdown = async (
   markdownSource: string,
 ): Promise<MarkdownResult> => {
-  const { mete, content } = await markdownToMeta(markdownSource);
+  const { meta: mete, content } = await markdownToMeta(markdownSource);
+
   if (!mete.title) {
     return {
       content: "",
-      mete: {
+      meta: {
         title: "",
       },
     };
@@ -160,7 +224,7 @@ const compileMarkdown = async (
 
   return {
     content: markdownToHtml(content),
-    mete,
+    meta: mete,
   };
 };
 
