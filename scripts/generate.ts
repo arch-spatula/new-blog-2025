@@ -9,21 +9,32 @@ import compileMarkdown from "./markdownToHtml";
  */
 const generate = async (dir: string) => {
   const srcDir = path.resolve(dir, "content"); // *.md 모아둔 곳
-  const outDir = path.resolve(dir, "public/blog");
+  const outBlogDir = path.resolve(dir, "public/blog");
 
   // 1) public/blog 디렉터리 초기화
-  fs.rmSync(outDir, { recursive: true, force: true });
-  fs.mkdirSync(outDir, { recursive: true });
+  fs.rmSync(outBlogDir, { recursive: true, force: true });
+  fs.mkdirSync(outBlogDir, { recursive: true });
 
   // 2) 모든 markdown 찾기
   const mdFiles = findMarkdownFiles(srcDir);
 
+  const data: {
+    blog: {
+      title: string;
+      date?: string;
+      tags?: string[];
+      draft?: boolean;
+    }[];
+  } = { blog: [] };
+
   // 3) 변환 & 저장
   for (const mdFile of mdFiles) {
     const markdown = fs.readFileSync(mdFile, "utf8");
-    const { mete, content } = await compileMarkdown(markdown);
+    const { meta: mete, content } = await compileMarkdown(markdown);
 
     if (!mete.title) return;
+
+    data.blog.push(mete);
 
     const outPath = mdFile
       .replace(/\.md$/, ".html")
@@ -31,6 +42,13 @@ const generate = async (dir: string) => {
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, content, "utf8");
   }
+
+  const outPublicDir = path.resolve(dir, "public");
+
+  const saveData = JSON.stringify(data);
+
+  fs.mkdirSync(path.dirname(outPublicDir), { recursive: true });
+  fs.writeFileSync(`${outPublicDir}/data.json`, saveData, "utf8");
 };
 
 export default generate;

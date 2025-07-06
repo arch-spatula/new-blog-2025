@@ -7,6 +7,9 @@ const main = async () => {
   // const readme = await import("../content/2025-07-02/2025-07-02-page.md?raw");
 
   const app = document.querySelector<HTMLDivElement>("#app");
+  const res = await fetch("public/data.json");
+  const data = await res.json();
+  console.log(data);
 
   if (app) {
     // const markdownContainer = document.createElement("div");
