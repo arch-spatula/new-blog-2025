@@ -148,61 +148,6 @@ const markdownToMeta = async (
   return { meta: { title: "" }, content: "" };
 };
 
-type Token =
-  | { title: string }
-  | { date: string }
-  | { draft: boolean }
-  | { tags: string[] };
-
-const lexer = (): Token => {
-  return { title: "" };
-};
-
-/**
- * 메타 정보 여부만 판단해야 함.
- */
-const scanner = (markdownSource: string) => {
-  /**
-   * ---
-   * title: "My Blog Post"
-   * date: "2025-07-05"
-   * tags: ["vite", "markdown"]
-   * ---
-   *
-   * # foo
-   *
-   * - hello foo
-   *
-   *   위에서 `---\n` 부터 `---\n`까지 사이 텍스트를 선택할 때 활용함.
-   */
-  const metaInfo = /^---\n([\s\S]*?)\n---\n?/;
-
-  const matchMeta = markdownSource.match(metaInfo);
-
-  if (matchMeta) {
-    const metaDataString = matchMeta[1]; // YAML 부분 (string)
-    // console.log(metaDataString);
-
-    return;
-  }
-
-  /**
-   * - `---\n`, `---\n` 사이에 메타 정보 작성 안해도 제목은 작성함.
-   *   - `---\n`, `---\n` 사이에 title이 없는 경우 문서의 가장 먼저 오는 heading 1을 활용함.
-   * - `# 이런저런 제목\n` 같은 형식을 찾아보고 title로 간주함.
-   */
-  const fromMarkdownTitle = /^# (.+)$/m;
-
-  const matchH1Title = markdownSource.match(fromMarkdownTitle);
-
-  if (matchH1Title) {
-    //
-    return;
-  }
-
-  console.warn("블로그 글에 제목이 없을 수 없습니다.");
-};
-
 /**
  * - 의사결정 트리 표현이 상당히 엉성한 상태
  *   - lexing, scanning 결정이 필요함.
