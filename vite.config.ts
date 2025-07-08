@@ -9,11 +9,14 @@ export default defineConfig(async ({}) => {
         name: "complel markdown to html when dev start",
         async configureServer({}) {
           console.log("🚀 configureServer 실행됨!");
-          try {
-            generate(__dirname);
-          } catch (err) {
-            console.error(err);
-            console.log("vite generate 실패");
+
+          if (process.env.NODE_ENV === "development") {
+            try {
+              generate(__dirname, process.env.NODE_ENV);
+            } catch (err) {
+              console.error(err);
+              console.log("vite generate 실패");
+            }
           }
         },
 
@@ -21,7 +24,7 @@ export default defineConfig(async ({}) => {
         async buildStart() {
           if (process.env.NODE_ENV === "production") {
             try {
-              generate(__dirname);
+              generate(__dirname, process.env.NODE_ENV);
             } catch (err) {
               console.error(err);
               console.log("vite generate 실패");

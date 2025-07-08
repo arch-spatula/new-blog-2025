@@ -1,15 +1,11 @@
 import "./style.css";
-
+import type { Data } from "../types/types";
 import blogList from "./blogList";
-// import markdownToHtml from "./markdownToHtml";
 
 const main = async () => {
-  // const readme = await import("../content/2025-07-02/2025-07-02-page.md?raw");
-
   const app = document.querySelector<HTMLDivElement>("#app");
-  const res = await fetch("public/data.json");
-  const data = await res.json();
-  console.log(data);
+  const res = await fetch("/data.json");
+  const data: Data = await res.json();
 
   if (app) {
     // const markdownContainer = document.createElement("div");
@@ -20,7 +16,7 @@ const main = async () => {
     // );
 
     // app.appendChild(markdownContainer);
-    app.appendChild(blogList());
+    app.appendChild(blogList(data.blog));
   }
 };
 
