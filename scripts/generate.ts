@@ -8,7 +8,7 @@ import type { Data } from "../types/types";
  * @todo html을 생성하는 로직에 index.json을 접근할 수 있는 로직도 만들기
  * @todo html용 header 및 markdown-body로 감싸기
  */
-const generate = async (dir: string) => {
+const generate = async (dir: string, ctx: "development" | "production") => {
   const srcDir = path.resolve(dir, "content"); // *.md 모아둔 곳
   const outBlogDir = path.resolve(dir, "public/blog");
 
@@ -26,13 +26,25 @@ const generate = async (dir: string) => {
     const markdown = fs.readFileSync(mdFile, "utf8");
     const { meta: mete, content } = await compileMarkdown(markdown);
 
-    if (!mete.title) return;
-
-    data.blog.push(mete);
+    switch (ctx) {
+      case "production":
+        if (!mete.title || mete.draft) continue;
+        break;
+      case "development":
+        if (!mete.title) continue;
+        break;
+      default:
+        break;
+    }
 
     const outPath = mdFile
       .replace(/\.md$/, ".html")
       .replace("content", "public/blog");
+
+    const relativePath = path.relative(__dirname, outPath);
+
+    mete.htmlPath = relativePath.slice(9);
+    data.blog.push(mete);
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, content, "utf8");
   }
