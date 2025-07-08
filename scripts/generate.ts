@@ -2,6 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
+import type { Data } from "../types/types";
 
 /**
  * @todo html을 생성하는 로직에 index.json을 접근할 수 있는 로직도 만들기
@@ -18,14 +19,7 @@ const generate = async (dir: string) => {
   // 2) 모든 markdown 찾기
   const mdFiles = findMarkdownFiles(srcDir);
 
-  const data: {
-    blog: {
-      title: string;
-      date?: string;
-      tags?: string[];
-      draft?: boolean;
-    }[];
-  } = { blog: [] };
+  const data: Data = { blog: [] };
 
   // 3) 변환 & 저장
   for (const mdFile of mdFiles) {
