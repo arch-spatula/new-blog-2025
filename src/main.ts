@@ -1,4 +1,4 @@
-import "./style.css";
+// import "./style.css";
 import type { Data } from "../types/types";
 import blogList from "./blogList";
 

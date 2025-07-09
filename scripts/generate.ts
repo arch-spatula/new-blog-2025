@@ -45,8 +45,22 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
     mete.htmlPath = relativePath.slice(9);
     data.blog.push(mete);
+
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, content, "utf8");
+    const contentWrapper = `<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>${mete.title}</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="markdown-body">${content}</div>
+  </body>
+</html>
+`;
+
+    fs.writeFileSync(outPath, contentWrapper, "utf8");
   }
 
   const outPublicDir = path.resolve(dir, "public");

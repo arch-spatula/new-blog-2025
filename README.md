@@ -28,6 +28,8 @@ pnpm run preview
 
 ## 아키텍쳐
 
+- MPA로 여러 html을 public에 만들어서 제공함.
+
 ### 빌드
 
 ```mermaid
