@@ -51,10 +51,12 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <title>${mete.title}</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
+    <nav><a href="/">home</a></nav>
     <div class="markdown-body">${content}</div>
   </body>
 </html>
