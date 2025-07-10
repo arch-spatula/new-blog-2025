@@ -4,6 +4,22 @@ import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
 import type { Data } from "../types/types";
 
+const wrapperContentHtml = (title: string, content: string) => {
+  return `<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <title>${title}</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <nav><a href="/">home</a></nav>
+    <div class="markdown-body">${content}</div>
+  </body>
+</html>`;
+};
+
 /**
  * @todo html을 생성하는 로직에 index.json을 접근할 수 있는 로직도 만들기
  * @todo html용 header 및 markdown-body로 감싸기
@@ -24,14 +40,14 @@ const generate = async (dir: string, ctx: "development" | "production") => {
   // 3) 변환 & 저장
   for (const mdFile of mdFiles) {
     const markdown = fs.readFileSync(mdFile, "utf8");
-    const { meta: mete, content } = await compileMarkdown(markdown);
+    const { meta: meta, content } = await compileMarkdown(markdown);
 
     switch (ctx) {
       case "production":
-        if (!mete.title || mete.draft) continue;
+        if (!meta.title || meta.draft) continue;
         break;
       case "development":
-        if (!mete.title) continue;
+        if (!meta.title) continue;
         break;
       default:
         break;
@@ -43,24 +59,12 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
     const relativePath = path.relative(__dirname, outPath);
 
-    mete.htmlPath = relativePath.slice(9);
-    data.blog.push(mete);
+    meta.htmlPath = relativePath.slice(9);
+    data.blog.push(meta);
 
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    const contentWrapper = `<!DOCTYPE html>
-<html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <title>${mete.title}</title>
-    <link rel="stylesheet" href="/style.css" />
-  </head>
-  <body>
-    <nav><a href="/">home</a></nav>
-    <div class="markdown-body">${content}</div>
-  </body>
-</html>
-`;
+
+    const contentWrapper = wrapperContentHtml(meta.title, content);
 
     fs.writeFileSync(outPath, contentWrapper, "utf8");
   }
