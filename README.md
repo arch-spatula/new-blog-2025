@@ -35,8 +35,15 @@ pnpm run preview
 ```mermaid
 graph LR
     findMarkdownFiles --> generate
-    markdownToHtml --> generate
+    compileMarkdown --> generate
+    markdownToMeta --> compileMarkdown
+    markdownToHtml --> compileMarkdown
+    wrapperContentHtml --> generate
 ```
+
+
+
+
 
 ### 사이트맵
 
