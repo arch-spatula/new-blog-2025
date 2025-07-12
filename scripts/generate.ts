@@ -4,7 +4,7 @@ import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
 import type { Data } from "../types/types";
 
-const wrapContentToHtml = (title: string, content: string) => {
+export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
 <html lang="ko">
   <head>
@@ -18,6 +18,41 @@ const wrapContentToHtml = (title: string, content: string) => {
     <div class="markdown-body">${content}</div>
   </body>
 </html>`;
+};
+
+/**
+ * 디스크 작성된 마크다운 파일을 읽고 메모리에 가져옴
+ * 메타정보를 객체 형식으로 추출함
+ */
+export const readMarkdown = async (fileName: string) => {
+  const markdown = fs.readFileSync(fileName, "utf8");
+
+  const { meta, content } = await compileMarkdown(markdown);
+
+  return { meta, content };
+};
+
+/**
+ * 메모리에 들고 있는 html 형식으로 변환된 마크다운을 디스크에 저장
+ */
+export const writeHtml = async (
+  fileName: string,
+  title: string,
+  content: string,
+) => {
+  const outPath = fileName
+    .replace(/\.md$/, ".html")
+    .replace("content", "public/blog");
+
+  const contentWrapper = wrapContentToHtml(title, content);
+
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, contentWrapper, "utf8");
+
+  return {
+    /** 저장할 html 경로 */
+    outPath,
+  };
 };
 
 /**
@@ -39,8 +74,7 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
   // 3) 변환 & 저장
   for (const mdFile of mdFiles) {
-    const markdown = fs.readFileSync(mdFile, "utf8");
-    const { meta: meta, content } = await compileMarkdown(markdown);
+    const { meta, content } = await readMarkdown(mdFile);
 
     switch (ctx) {
       case "production":
@@ -53,20 +87,12 @@ const generate = async (dir: string, ctx: "development" | "production") => {
         break;
     }
 
-    const outPath = mdFile
-      .replace(/\.md$/, ".html")
-      .replace("content", "public/blog");
+    const { outPath } = await writeHtml(mdFile, meta.title, content);
 
     const relativePath = path.relative(__dirname, outPath);
 
     meta.htmlPath = relativePath.slice(9);
     data.blog.push(meta);
-
-    fs.mkdirSync(path.dirname(outPath), { recursive: true });
-
-    const contentWrapper = wrapContentToHtml(meta.title, content);
-
-    fs.writeFileSync(outPath, contentWrapper, "utf8");
   }
 
   const outPublicDir = path.resolve(dir, "public");
