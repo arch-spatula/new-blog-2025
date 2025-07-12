@@ -8,14 +8,8 @@ const main = async () => {
   const data: Data = await res.json();
 
   if (app) {
-    // const markdownContainer = document.createElement("div");
-    // markdownContainer.classList.add("markdown-body");
-    // markdownContainer.insertAdjacentHTML(
-    //   "beforeend",
-    //   markdownToHtml(readme.default),
-    // );
+    console.log("app????", app);
 
-    // app.appendChild(markdownContainer);
     app.appendChild(blogList(data.blog));
   }
 };

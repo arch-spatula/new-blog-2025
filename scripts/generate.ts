@@ -4,7 +4,7 @@ import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
 import type { Data } from "../types/types";
 
-const wrapperContentHtml = (title: string, content: string) => {
+const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
 <html lang="ko">
   <head>
@@ -21,8 +21,8 @@ const wrapperContentHtml = (title: string, content: string) => {
 };
 
 /**
- * @todo html을 생성하는 로직에 index.json을 접근할 수 있는 로직도 만들기
- * @todo html용 header 및 markdown-body로 감싸기
+ * 전체 마크다운 파일을 감지하는 로직 분리
+ * html 파일을 디스크에 저장하는 로직 분리
  */
 const generate = async (dir: string, ctx: "development" | "production") => {
   const srcDir = path.resolve(dir, "content"); // *.md 모아둔 곳
@@ -64,7 +64,7 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
 
-    const contentWrapper = wrapperContentHtml(meta.title, content);
+    const contentWrapper = wrapContentToHtml(meta.title, content);
 
     fs.writeFileSync(outPath, contentWrapper, "utf8");
   }
