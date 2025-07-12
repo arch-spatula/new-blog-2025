@@ -98,7 +98,6 @@ const markdownToMeta = async (
             );
             result["draft"] = parsedDraft["draft"];
             break;
-
           default:
             console.warn("허용한 하지 않은 키입니다.");
             throw new Error("허용한 하지 않은 키입니다.");
