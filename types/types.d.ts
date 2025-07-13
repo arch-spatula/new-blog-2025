@@ -10,6 +10,8 @@ export type MetaObject = {
    */
   draft?: boolean;
   htmlPath?: string;
+
+  fileName: string;
 };
 
 export type Data = {
