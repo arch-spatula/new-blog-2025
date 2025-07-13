@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
-import type { Data } from "../types/types";
+import type { Data, MetaObject } from "../types/types";
 
 export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
@@ -24,10 +24,15 @@ export const wrapContentToHtml = (title: string, content: string) => {
  * 디스크 작성된 마크다운 파일을 읽고 메모리에 가져옴
  * 메타정보를 객체 형식으로 추출함
  */
-export const readMarkdown = async (fileName: string) => {
-  const markdown = fs.readFileSync(fileName, "utf8");
+export const readMarkdown = async (fullPathFileName: string) => {
+  const markdown = fs.readFileSync(fullPathFileName, "utf8");
 
   const { meta, content } = await compileMarkdown(markdown);
+
+  const fileName = fullPathFileName.match(/([^/\\]+\.md)$/);
+  if (fileName && fileName[1]) {
+    meta.fileName = fileName[1];
+  }
 
   return { meta, content };
 };
@@ -56,8 +61,7 @@ export const writeHtml = async (
 };
 
 /**
- * 전체 마크다운 파일을 감지하는 로직 분리
- * html 파일을 디스크에 저장하는 로직 분리
+ * JSON은 여기 말고 다른 위치에서 저장하기
  */
 const generate = async (dir: string, ctx: "development" | "production") => {
   const srcDir = path.resolve(dir, "content"); // *.md 모아둔 곳
@@ -70,7 +74,7 @@ const generate = async (dir: string, ctx: "development" | "production") => {
   // 2) 모든 markdown 찾기
   const mdFiles = findMarkdownFiles(srcDir);
 
-  const data: Data = { blog: [] };
+  const metaObjects: MetaObject[] = [];
 
   // 3) 변환 & 저장
   for (const mdFile of mdFiles) {
@@ -89,18 +93,14 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
     const { outPath } = await writeHtml(mdFile, meta.title, content);
 
-    const relativePath = path.relative(__dirname, outPath);
+    const relativePath = path.relative(dir, outPath);
+    console.log("relativePath", relativePath);
 
-    meta.htmlPath = relativePath.slice(9);
-    data.blog.push(meta);
+    meta.htmlPath = relativePath.slice(7);
+    metaObjects.push(meta);
   }
 
-  const outPublicDir = path.resolve(dir, "public");
-
-  const saveData = JSON.stringify(data);
-
-  fs.mkdirSync(path.dirname(outPublicDir), { recursive: true });
-  fs.writeFileSync(`${outPublicDir}/data.json`, saveData, "utf8");
+  return metaObjects;
 };
 
 export default generate;
