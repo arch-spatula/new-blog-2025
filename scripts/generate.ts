@@ -94,7 +94,6 @@ const generate = async (dir: string, ctx: "development" | "production") => {
     const { outPath } = await writeHtml(mdFile, meta.title, content);
 
     const relativePath = path.relative(dir, outPath);
-    console.log("relativePath", relativePath);
 
     meta.htmlPath = relativePath.slice(7);
     metaObjects.push(meta);
