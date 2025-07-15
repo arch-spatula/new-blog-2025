@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
-import type { Data, MetaObject } from "../types/types";
+import type { MetaObject } from "../types/types";
 
 export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>

@@ -4,6 +4,12 @@ import remark2rehype from "remark-rehype";
 import html from "rehype-stringify";
 import type { MetaObject } from "../types/types";
 
+class EmptyMeta implements MetaObject {
+  title: string = "";
+  fileName: string = "";
+  constructor() {}
+}
+
 /**
  * @todo 메타정보 파싱하기
  *   - `---\n`으로 시작하고 `---\n`으로 끝나는 텍스트내의 자료 활용하기
@@ -41,6 +47,13 @@ type MarkdownResult = {
   content: string;
   meta: MetaObject;
 };
+
+class EmptyMarkdownResult implements MarkdownResult {
+  content: string = "";
+  meta: MetaObject = new EmptyMeta();
+  constructor() {}
+}
+
 const markdownToMeta = async (
   markdownSource: string,
 ): Promise<MarkdownResult> => {
@@ -105,7 +118,7 @@ const markdownToMeta = async (
       }
     } catch (err) {
       console.error(`유효하지 않은 형식입니다.\n${err}`);
-      return { meta: { title: "", fileName: "" }, content: "" };
+      return new EmptyMarkdownResult();
     }
 
     if (result.title) return { meta: result, content: content };
@@ -133,7 +146,7 @@ const markdownToMeta = async (
    * 제목도 작성 안 하는 막장은 굳이 보여주지 않음.
    * 콘솔에 경고 보여주고 다음 파일로 넘어가도록 함.
    */
-  return { meta: { title: "", fileName: "" }, content: "" };
+  return new EmptyMarkdownResult();
 };
 
 /**
@@ -144,16 +157,10 @@ const markdownToMeta = async (
 const compileMarkdown = async (
   markdownSource: string,
 ): Promise<MarkdownResult> => {
-  const { meta , content } = await markdownToMeta(markdownSource);
+  const { meta, content } = await markdownToMeta(markdownSource);
 
   if (!meta.title) {
-    return {
-      content: "",
-      meta: {
-        title: "",
-        fileName: "",
-      },
-    };
+    return new EmptyMarkdownResult();
   }
 
   return {
