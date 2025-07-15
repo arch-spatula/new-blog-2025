@@ -1,4 +1,3 @@
-// import "./style.css";
 import type { Data } from "../types/types";
 import blogList from "./blogList";
 
@@ -8,8 +7,6 @@ const main = async () => {
   const data: Data = await res.json();
 
   if (app) {
-    console.log("app????", app);
-
     app.appendChild(blogList(data.blog));
   }
 };
