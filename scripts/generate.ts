@@ -60,6 +60,16 @@ export const writeHtml = async (
   };
 };
 
+export const removePublicPrefix = (outPath: string) => {
+  const relativePath = path.relative(__dirname, outPath);
+  const publicPrefix = "../public/";
+
+  if (relativePath.startsWith(publicPrefix))
+    return relativePath.slice(publicPrefix.length);
+
+  return relativePath;
+};
+
 /**
  * JSON은 여기 말고 다른 위치에서 저장하기
  */
@@ -93,9 +103,7 @@ const generate = async (dir: string, ctx: "development" | "production") => {
 
     const { outPath } = await writeHtml(mdFile, meta.title, content);
 
-    const relativePath = path.relative(dir, outPath);
-
-    meta.htmlPath = relativePath.slice(7);
+    meta.htmlPath = removePublicPrefix(outPath);
     metaObjects.push(meta);
   }
 
