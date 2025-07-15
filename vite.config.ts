@@ -1,7 +1,11 @@
 import { defineConfig, type ViteDevServer } from "vite";
 import * as path from "path";
 import * as fs from "fs";
-import generate, { readMarkdown, writeHtml } from "./scripts/generate";
+import generate, {
+  readMarkdown,
+  removePublicPrefix,
+  writeHtml,
+} from "./scripts/generate";
 import type { Data } from "./types/types";
 
 const writeJSON = async (dir: string, data: Data) => {
@@ -19,7 +23,7 @@ export default defineConfig(async ({}) => {
   return {
     plugins: [
       {
-        name: "complel markdown to html when dev start",
+        name: "complel markdown",
         async configureServer({}: ViteDevServer) {
           console.log("🚀 configureServer 실행됨!");
 
@@ -75,9 +79,8 @@ export default defineConfig(async ({}) => {
                 !data.blog.map((elem) => elem.fileName).includes(meta.fileName)
               ) {
                 const { outPath } = await writeHtml(file, meta.title, content);
-                const relativePath = path.relative(__dirname, outPath);
 
-                meta.htmlPath = relativePath.slice(7);
+                meta.htmlPath = removePublicPrefix(outPath);
 
                 data.blog.push(meta);
 
@@ -86,9 +89,9 @@ export default defineConfig(async ({}) => {
               }
 
               const { outPath } = await writeHtml(file, meta.title, content);
-              const relativePath = path.relative(__dirname, outPath);
 
-              meta.htmlPath = relativePath.slice(7);
+              meta.htmlPath = removePublicPrefix(outPath);
+
               const idx = data.blog.findIndex(
                 (elem) => elem.title === meta.title,
               );

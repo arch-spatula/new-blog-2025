@@ -74,7 +74,7 @@ const markdownToMeta = async (
 
   const match = markdownSource.match(frontMatterRegex);
 
-  const result = { title: "", fileName: "" } satisfies MetaObject;
+  const result = new EmptyMeta();
   /**
    * `---\n`, `---\n` 사이에 메타 정보를 작성할 것을 준수함.
    */
