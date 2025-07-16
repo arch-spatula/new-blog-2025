@@ -21,6 +21,18 @@ export const wrapContentToHtml = (title: string, content: string) => {
 };
 
 /**
+ * /foo/bar/baz.md -> baz.md
+ */
+export const extractMarkdownFileNameFromPath = (fullPathFileName: string) => {
+  const fileName = fullPathFileName.match(/([^/\\]+\.md)$/);
+
+  if (fileName && fileName[1]) {
+    return fileName[1];
+  }
+  return fullPathFileName;
+};
+
+/**
  * 디스크 작성된 마크다운 파일을 읽고 메모리에 가져옴
  * 메타정보를 객체 형식으로 추출함
  */
@@ -29,10 +41,7 @@ export const readMarkdown = async (fullPathFileName: string) => {
 
   const { meta, content } = await compileMarkdown(markdown);
 
-  const fileName = fullPathFileName.match(/([^/\\]+\.md)$/);
-  if (fileName && fileName[1]) {
-    meta.fileName = fileName[1];
-  }
+  meta.fileName = extractMarkdownFileNameFromPath(fullPathFileName);
 
   return { meta, content };
 };
