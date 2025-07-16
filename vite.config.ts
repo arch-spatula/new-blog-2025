@@ -2,6 +2,7 @@ import { defineConfig, type ViteDevServer } from "vite";
 import * as path from "path";
 import * as fs from "fs";
 import generate, {
+  extractMarkdownFileNameFromPath,
   readMarkdown,
   removePublicPrefix,
   writeHtml,
@@ -104,14 +105,12 @@ export default defineConfig(async ({}) => {
             }
 
             case "delete": {
-              const fileName = file.match(/([^/\\]+\.md)$/);
-              if (fileName && fileName[1]) {
-                data.blog = data.blog.filter(
-                  (elem) => elem.fileName !== fileName[1],
-                );
+              data.blog = data.blog.filter(
+                (elem) =>
+                  elem.fileName !== extractMarkdownFileNameFromPath(file),
+              );
 
-                await writeJSON(__dirname, data);
-              }
+              await writeJSON(__dirname, data);
 
               break;
             }
