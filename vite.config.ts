@@ -94,7 +94,7 @@ export default defineConfig(async ({}) => {
               meta.htmlPath = removePublicPrefix(outPath);
 
               const idx = data.blog.findIndex(
-                (elem) => elem.title === meta.title,
+                (elem) => elem.htmlPath === meta.htmlPath,
               );
               if (idx > 0) {
                 data.blog[idx] = meta;
