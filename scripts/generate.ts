@@ -48,6 +48,9 @@ export const readMarkdown = async (fullPathFileName: string) => {
 
 /**
  * 메모리에 들고 있는 html 형식으로 변환된 마크다운을 디스크에 저장
+ * @param fileName /foo/bar/baz.md
+ * @param title `# 제목`, `title: 제목` 중 있는 값을 활용함.
+ * @param content 마크다운 내용에 해당하는 문자열
  */
 export const writeHtml = async (
   fileName: string,

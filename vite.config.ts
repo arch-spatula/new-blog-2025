@@ -69,9 +69,18 @@ export default defineConfig(async ({}) => {
             return;
 
           switch (type) {
+            /**
+             * - 파일을 생성하는 시점에 실행 됨
+             * - 최초 생성 시점에는 파일 내용이 비어있어서 html 생성할 이유가 없음.
+             */
             case "create": {
               break;
             }
+            /**
+             * - 파일 편집 시점에 실행됨.
+             * - h1에 해당하는 제목을 작성하고 파일 저장하면 html 저장과 `data.json`에 저장이 처음으로 실행 됨
+             * - 내용을 갱신하면 html과 `data.json`을 갱신함.
+             */
             case "update": {
               const { meta, content } = await readMarkdown(file);
 
@@ -104,6 +113,9 @@ export default defineConfig(async ({}) => {
               break;
             }
 
+            /**
+             * - 파일을 삭제하면 `data.json`에서 제거
+             */
             case "delete": {
               data.blog = data.blog.filter(
                 (elem) =>
