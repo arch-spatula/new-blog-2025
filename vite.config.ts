@@ -65,70 +65,110 @@ export default defineConfig(async ({}) => {
           type: "create" | "update" | "delete";
           file: string;
         }) {
-          if (!file.endsWith(".md") || !file.startsWith(`${__dirname}/content`))
-            return;
+          if (!file.startsWith(`${__dirname}/content`)) return;
 
-          switch (type) {
-            /**
-             * - 파일을 생성하는 시점에 실행 됨
-             * - 최초 생성 시점에는 파일 내용이 비어있어서 html 생성할 이유가 없음.
-             */
-            case "create": {
-              break;
-            }
-            /**
-             * - 파일 편집 시점에 실행됨.
-             * - h1에 해당하는 제목을 작성하고 파일 저장하면 html 저장과 `data.json`에 저장이 처음으로 실행 됨
-             * - 내용을 갱신하면 html과 `data.json`을 갱신함.
-             */
-            case "update": {
-              const { meta, content } = await readMarkdown(file);
+          /**
+           * 마크다운일 때 로직처리
+           */
+          if (file.endsWith(".md")) {
+            switch (type) {
+              /**
+               * - 파일을 생성하는 시점에 실행 됨
+               * - 최초 생성 시점에는 파일 내용이 비어있어서 html 생성할 이유가 없음.
+               */
+              case "create": {
+                break;
+              }
+              /**
+               * - 파일 편집 시점에 실행됨.
+               * - h1에 해당하는 제목을 작성하고 파일 저장하면 html 저장과 `data.json`에 저장이 처음으로 실행 됨
+               * - 내용을 갱신하면 html과 `data.json`을 갱신함.
+               */
+              case "update": {
+                const { meta, content } = await readMarkdown(file);
 
-              if (
-                !meta.title ||
-                !data.blog.map((elem) => elem.fileName).includes(meta.fileName)
-              ) {
+                if (
+                  !meta.title ||
+                  !data.blog
+                    .map((elem) => elem.fileName)
+                    .includes(meta.fileName)
+                ) {
+                  const { outPath } = await writeHtml(
+                    file,
+                    meta.title,
+                    content,
+                  );
+
+                  meta.htmlPath = removePublicPrefix(outPath);
+
+                  data.blog.push(meta);
+
+                  await writeJSON(__dirname, data);
+                  break;
+                }
+
                 const { outPath } = await writeHtml(file, meta.title, content);
 
                 meta.htmlPath = removePublicPrefix(outPath);
 
-                data.blog.push(meta);
+                const idx = data.blog.findIndex(
+                  (elem) => elem.htmlPath === meta.htmlPath,
+                );
+                if (idx > 0) {
+                  data.blog[idx] = meta;
+                  await writeJSON(__dirname, data);
+                }
 
-                await writeJSON(__dirname, data);
                 break;
               }
 
-              const { outPath } = await writeHtml(file, meta.title, content);
+              /**
+               * - 파일을 삭제하면 `data.json`에서 제거
+               */
+              case "delete": {
+                data.blog = data.blog.filter(
+                  (elem) =>
+                    elem.fileName !== extractMarkdownFileNameFromPath(file),
+                );
 
-              meta.htmlPath = removePublicPrefix(outPath);
-
-              const idx = data.blog.findIndex(
-                (elem) => elem.htmlPath === meta.htmlPath,
-              );
-              if (idx > 0) {
-                data.blog[idx] = meta;
                 await writeJSON(__dirname, data);
+
+                break;
               }
 
-              break;
+              default: {
+                break;
+              }
             }
+          }
+          /**
+           * 이미지 로직처리
+           */
+          if (
+            file.endsWith(".png") ||
+            file.endsWith(".gif") ||
+            file.endsWith(".jpeg") ||
+            file.endsWith(".jpg")
+          ) {
+            switch (type) {
+              case "create": {
+                const oupPath = file.replace("content", "public/blog");
 
-            /**
-             * - 파일을 삭제하면 `data.json`에서 제거
-             */
-            case "delete": {
-              data.blog = data.blog.filter(
-                (elem) =>
-                  elem.fileName !== extractMarkdownFileNameFromPath(file),
-              );
+                fs.copyFileSync(file, oupPath);
+                break;
+              }
+              case "update": {
+                const oupPath = file.replace("content", "public/blog");
 
-              await writeJSON(__dirname, data);
+                fs.copyFileSync(file, oupPath);
+                break;
+              }
+              case "delete": {
+                break;
+              }
 
-              break;
-            }
-
-            default: {
-              break;
+              default:
+                break;
             }
           }
         },

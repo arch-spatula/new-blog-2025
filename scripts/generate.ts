@@ -19,6 +19,10 @@ function findImgFiles(dir: string): string[] {
 
   return results;
 }
+
+/** 
+ * @todo content에 h1에 해당하는 태그가 없으면 임의로 h1 태그 생성
+ */
 export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
 <html lang="ko">
