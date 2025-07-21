@@ -34,11 +34,24 @@ pnpm run preview
 
 ```mermaid
 graph LR
+    configureServer --> defineConfig
+    buildStart --> defineConfig
+    hotUpdate --> defineConfig
+    readMarkdown --> hotUpdate
+    writeHtml --> hotUpdate
+    removePublicPrefix --> hotUpdate
+    writeJSON --> hotUpdate
+    extractMarkdownFileNameFromPath --> hotUpdate
+    generate --> configureServer
+    generate --> buildStart
     findMarkdownFiles --> generate
-    compileMarkdown --> generate
+    readMarkdown --> generate
+    writeHtml --> generate
+    wrapperContentHtml --> generate
+    compileMarkdown --> readMarkdown
     markdownToMeta --> compileMarkdown
     markdownToHtml --> compileMarkdown
-    wrapperContentHtml --> generate
+    extractMarkdownFileNameFromPath --> compileMarkdown
 ```
 
 ### 사이트맵
