@@ -4,6 +4,21 @@ import findMarkdownFiles from "./findMarkdownFiles";
 import compileMarkdown from "./markdownToHtml";
 import type { MetaObject } from "../types/types";
 
+function findImgFiles(dir: string): string[] {
+  const results: string[] = [];
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findImgFiles(fullPath));
+    } else if (entry.isFile() && fullPath.endsWith(".png")) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
 export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -114,11 +129,19 @@ const generate = async (dir: string, ctx: "development" | "production") => {
     }
 
     const { outPath } = await writeHtml(mdFile, meta.title, content);
+    // 이미지 복사 처리
 
     meta.htmlPath = removePublicPrefix(outPath);
     metaObjects.push(meta);
   }
 
+  const imgFiles = findImgFiles(srcDir);
+
+  for (const srcFile of imgFiles) {
+    const oupPath = srcFile.replace("content", "public/blog");
+
+    fs.copyFileSync(srcFile, oupPath);
+  }
   return metaObjects;
 };
 
