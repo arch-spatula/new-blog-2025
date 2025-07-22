@@ -10,15 +10,39 @@ const blogList = (metaObjects: MetaObject[]) => {
   for (const metaObject of metaObjects) {
     const li = document.createElement("li");
 
+    const constainer = document.createElement("div");
+
     const blogLink = document.createElement("a");
 
     if (!metaObject.htmlPath) continue;
     const newPath = metaObject.htmlPath;
 
-    blogLink.innerText = newPath;
+    blogLink.innerText = metaObject.title;
     blogLink.href = newPath;
 
-    li.appendChild(blogLink);
+    constainer.appendChild(blogLink);
+
+    const dateText = document.createElement("p");
+
+    if (metaObject.date) {
+      dateText.innerText = metaObject.date;
+      constainer.appendChild(dateText);
+    }
+
+    const tagList = document.createElement("ul");
+
+    if (metaObject.tags?.length) {
+      const tagItem = document.createElement("li");
+      metaObject.tags.forEach((tag) => {
+        tagItem.innerText = tag;
+
+        tagList.appendChild(tagItem);
+      });
+    }
+
+    constainer.appendChild(tagList);
+
+    li.appendChild(constainer);
 
     ul.appendChild(li);
   }

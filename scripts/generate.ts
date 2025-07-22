@@ -33,8 +33,10 @@ export const wrapContentToHtml = (title: string, content: string) => {
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <nav><a href="/">home</a></nav>
-    <div class="markdown-body">${content}</div>
+    <div id="app">
+      <nav><a href="/">home</a></nav>
+      <div class="markdown-body">${content}</div>
+    </div>
   </body>
 </html>`;
 };
