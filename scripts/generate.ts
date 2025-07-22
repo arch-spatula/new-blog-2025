@@ -20,7 +20,7 @@ function findImgFiles(dir: string): string[] {
   return results;
 }
 
-/** 
+/**
  * @todo content에 h1에 해당하는 태그가 없으면 임의로 h1 태그 생성
  */
 export const wrapContentToHtml = (title: string, content: string) => {
@@ -60,6 +60,15 @@ export const readMarkdown = async (fullPathFileName: string) => {
 
   const { meta, content } = await compileMarkdown(markdown);
 
+  /**
+   * 날짜가 마크다운 문서 내 YAML에 없으면 파일 제목에서 찾아보고 date를 임의로 할당함.
+   */
+  if (!meta.date) {
+    const regex = /\b\d{4}\-\d{2}\-\d{2}\b/g;
+
+    const matches = fullPathFileName.match(regex);
+    if (matches?.length) meta.date = matches?.pop();
+  }
   meta.fileName = extractMarkdownFileNameFromPath(fullPathFileName);
 
   return { meta, content };
