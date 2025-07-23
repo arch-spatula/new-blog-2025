@@ -6,9 +6,11 @@ import type { MetaObject } from "../types/types";
  */
 const blogList = (metaObjects: MetaObject[]) => {
   const ul = document.createElement("ul");
+  ul.classList.add("blog-list");
 
   for (const metaObject of metaObjects) {
     const li = document.createElement("li");
+    li.classList.add("blog-item");
 
     const constainer = document.createElement("div");
 
@@ -30,10 +32,13 @@ const blogList = (metaObjects: MetaObject[]) => {
     }
 
     const tagList = document.createElement("ul");
+    tagList.classList.add("tag-list");
 
     if (metaObject.tags?.length) {
-      const tagItem = document.createElement("li");
       metaObject.tags.forEach((tag) => {
+        const tagItem = document.createElement("li");
+
+        tagItem.classList.add("tag-item");
         tagItem.innerText = tag;
 
         tagList.appendChild(tagItem);
