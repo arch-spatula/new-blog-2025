@@ -19,6 +19,7 @@ body {
   background-color: transparent;
   color: #478be6;
   text-decoration: none;
+  font-weight: 600;
 }
 .blog-list {
   list-style-type: none;
@@ -37,7 +38,13 @@ body {
 }
 .blog-date {
   color: #9198a1;
-  margin: 8px 0 4px 0;
+  margin: 8px 0 4px;
+}
+.blog-divider {
+  border: 0;
+  height: 1px;
+  color: #3d444db3;
+  margin: 8px 0 0 0;
 }
 .tag-list {
   display: flex;
