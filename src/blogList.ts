@@ -15,6 +15,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     const constainer = document.createElement("div");
 
     const blogLink = document.createElement("a");
+    blogLink.classList.add("blog-link");
 
     if (!metaObject.htmlPath) continue;
     const newPath = metaObject.htmlPath;
@@ -25,6 +26,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     constainer.appendChild(blogLink);
 
     const dateText = document.createElement("p");
+    dateText.classList.add("blog-date");
 
     if (metaObject.date) {
       dateText.innerText = metaObject.date;
@@ -37,9 +39,12 @@ const blogList = (metaObjects: MetaObject[]) => {
     if (metaObject.tags?.length) {
       metaObject.tags.forEach((tag) => {
         const tagItem = document.createElement("li");
+        const p = document.createElement("span");
 
         tagItem.classList.add("tag-item");
-        tagItem.innerText = tag;
+        p.classList.add("tag-text");
+        p.innerText = `#${tag}`;
+        tagItem.appendChild(p);
 
         tagList.appendChild(tagItem);
       });
