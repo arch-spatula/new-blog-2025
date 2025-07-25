@@ -52,6 +52,11 @@ const blogList = (metaObjects: MetaObject[]) => {
 
     constainer.appendChild(tagList);
 
+    const line = document.createElement("hr");
+    line.classList.add("blog-divider");
+
+    constainer.appendChild(line);
+
     li.appendChild(constainer);
 
     ul.appendChild(li);
