@@ -15,12 +15,42 @@ body {
   width: 800px;
   margin: auto;
 }
+/* 상단 네비게이션 */
+.nav {
+  border-bottom: 1px solid #3d444db3;
+  height: 64px;
+  margin: 0 0 12px;
+}
+.blog-logo-container {
+  height: 100%;
+  padding: 0 8px;
+}
+.blog-logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: 12px;
+}
+.logo-img {
+  width: 32px;
+  height: 32px;
+}
+.nav ul {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+.nav ul li {
+  list-style-type: none;
+}
 .nav a {
-  background-color: transparent;
   color: #478be6;
   text-decoration: none;
   font-weight: 600;
 }
+/* 블로그 글 목록 */
 .blog-list {
   list-style-type: none;
   display: flex;
