@@ -47,6 +47,7 @@ export const wrapContentToHtml = (title: string, content: string) => {
       </nav>
       <div class="markdown-body">${content}</div>
       <footer class="footer"></footer>
+      <script type="module" src="/bar.js"></script>
     </div>
   </body>
 </html>`;

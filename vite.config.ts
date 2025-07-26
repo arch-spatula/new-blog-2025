@@ -206,5 +206,18 @@ export default defineConfig(async ({}) => {
       },
     },
     assetsInclude: ["**/*.md"],
+    build: {
+      rollupOptions: {
+        input: {
+          index: "index.html",
+          bar: path.resolve(__dirname, "src/bar.ts"),
+        },
+        output: {
+          entryFileNames: "[name].js",
+          chunkFileNames: "[name].js",
+          assetFileNames: "[name][extname]",
+        },
+      },
+    },
   };
 });
