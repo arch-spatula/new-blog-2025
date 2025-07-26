@@ -22,6 +22,7 @@ function findImgFiles(dir: string): string[] {
 
 /**
  * @todo content에 h1에 해당하는 태그가 없으면 임의로 h1 태그 생성
+ * @todo 의존하는 파일이 너무 많아지면 삼항 연산자 제거하고 string builder 패턴으로 바꾸기
  */
 export const wrapContentToHtml = (title: string, content: string) => {
   return `<!DOCTYPE html>
@@ -45,9 +46,9 @@ export const wrapContentToHtml = (title: string, content: string) => {
           <li><a href="https://github.com" target="_blank">GitHub</a></li>
         </ul>
       </nav>
-      <div class="markdown-body">${content}</div>
+      <div id="content" class="markdown-body">${content}</div>
       <footer class="footer"></footer>
-      <script type="module" src="/bar.js"></script>
+      <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
     </div>
   </body>
 </html>`;
