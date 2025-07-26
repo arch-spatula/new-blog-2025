@@ -50,12 +50,19 @@ export default defineConfig(async ({}) => {
         async buildStart() {
           if (process.env.NODE_ENV === "production") {
             try {
-              generate(__dirname, process.env.NODE_ENV);
+              const metaObjects = await generate(
+                __dirname,
+                process.env.NODE_ENV,
+              );
+
+              data.blog.push(...metaObjects);
             } catch (err) {
               console.error(err);
               console.log("vite generate 실패");
             }
           }
+
+          await writeJSON(__dirname, data);
         },
 
         async hotUpdate({
