@@ -104,6 +104,59 @@ body {
   height: 150px;
 }
 
+/* copy button */
+#content .code-block-wraper {
+  z-index: 0;
+  position: relative;
+}
+
+#content .code-block-wraper:hover > .copy-warrper {
+  display: block;
+}
+
+.copy-warrper {
+  width: 36px !important;
+  height: 36px;
+  position: absolute;
+  border-radius: 4px;
+  top: 0;
+  right: 0;
+  margin: 8px;
+  display: none;
+
+  aspect-ratio: 1 / 1;
+}
+.copy-warrper:hover {
+  background-color: #22272e;
+}
+
+#content .copy-warrper > .btn {
+  all: unset;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.copy-btn {
+  background-color: #9198a1 !important;
+  mask: url(public/clipboard.svg) no-repeat center !important;
+}
+
+.clicked-copy-btn {
+  background-color: #478be6 !important;
+  mask: url(public/clipboard-check.svg) no-repeat center !important;
+}
+
+/* 
+* code block 가로스크롤 예외 처리
+* 오른쪽으로 스크롤 끝까지 가면 16px 만큼 추가해서 좌우 대칭 맞춤 
+*/
+code > .line > span:last-child {
+  padding: 0 16px 0 0;
+}
+
 /* dark_dimmed */
 .markdown-body {
   color-scheme: dark;
