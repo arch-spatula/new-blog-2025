@@ -9,10 +9,29 @@ import generate, {
 } from "./scripts/generate";
 import type { Data } from "./types/types";
 
+/**
+ * 날짜 기준 정렬은 런타임 말고 컴파일 타임에 처리하는 것이 합리적
+ */
 const writeJSON = async (dir: string, data: Data) => {
   const outPublicDir = path.resolve(dir, "public");
 
-  const saveData = JSON.stringify(data);
+  const sortedData = {
+    ...data,
+    blog: data.blog.sort((prev, post) => {
+      if (prev.date && post.date) {
+        return prev.date > post.date ? -1 : 1;
+      }
+      if (prev.date && !post.date) {
+        return -1;
+      }
+      if (!prev.date && post.date) {
+        return 1;
+      }
+      return prev.title > post.title ? -1 : 1;
+    }),
+  } satisfies Data;
+
+  const saveData = JSON.stringify(sortedData);
 
   fs.mkdirSync(path.dirname(outPublicDir), { recursive: true });
   fs.writeFileSync(`${outPublicDir}/data.json`, saveData, "utf8");

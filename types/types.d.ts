@@ -12,6 +12,7 @@ export type MetaObject = {
   htmlPath?: string;
 
   fileName: string;
+  description?: string;
 };
 
 export type Data = {
