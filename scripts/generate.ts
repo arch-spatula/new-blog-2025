@@ -38,7 +38,7 @@ export const wrapContentToHtml = (title: string, content: string) => {
         <ul>
           <li class="blog-logo-container">
             <a href="/" class="blog-logo">
-              <img class="logo-img" src="/public/vite.svg" alt="blog logo" />
+              <img class="logo-img" src="/vite.svg" alt="blog logo" />
               <p>home</p>
             </a>
           </li>
@@ -143,19 +143,22 @@ const generate = async (dir: string, ctx: "development" | "production") => {
     const { meta, content } = await readMarkdown(mdFile);
 
     switch (ctx) {
-      case "production":
+      case "production": {
         if (!meta.title || meta.draft) continue;
         break;
-      case "development":
+      }
+
+      case "development": {
         if (!meta.title) continue;
         break;
-      default:
+      }
+
+      default: {
         break;
+      }
     }
 
     const { outPath } = await writeHtml(mdFile, meta.title, content);
-    // 이미지 복사 처리
-
     meta.htmlPath = removePublicPrefix(outPath);
     metaObjects.push(meta);
   }
