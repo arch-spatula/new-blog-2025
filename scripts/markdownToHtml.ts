@@ -54,6 +54,21 @@ class EmptyMarkdownResult implements MarkdownResult {
   constructor() {}
 }
 
+const checkParse = async (key: string, value: string) => {
+  try {
+    const parsed = await JSON.parse(`{"${key.trim()}": ${value.trim()}}`);
+
+    return parsed[key];
+  } catch (err) {
+    /**
+     * 빌드 에러가 발생한 이유를 더 쉽게 파악할 수 있게 만듬
+     */
+    throw new Error(
+      `${key}의 ${value.trim()}은 JSON으로 변환 가능한 형식이 아닙니다.`,
+    );
+  }
+};
+
 const markdownToMeta = async (
   markdownSource: string,
 ): Promise<MarkdownResult> => {
@@ -87,30 +102,26 @@ const markdownToMeta = async (
         const [key, value] = metaData.split(":");
 
         switch (key.trim()) {
-          case "title":
-            const parsedTitle = await JSON.parse(
-              `{"${key.trim()}": ${value.trim()}}`,
-            );
-            result["title"] = parsedTitle["title"];
+          case "title": {
+            result["title"] = await checkParse("title", value);
             break;
-          case "date":
-            const parsedDate = await JSON.parse(
-              `{"${key.trim()}": ${value.trim()}}`,
-            );
-            result["date"] = parsedDate["date"];
+          }
+          case "date": {
+            result["date"] = await checkParse("date", value);
             break;
-          case "tags":
-            const parsedTags = await JSON.parse(
-              `{"${key.trim()}": ${value.trim()}}`,
-            );
-            result["tags"] = parsedTags["tags"];
+          }
+          case "tags": {
+            result["tags"] = await checkParse("tags", value);
             break;
-          case "draft":
-            const parsedDraft = await JSON.parse(
-              `{"${key.trim()}": ${value.trim()}}`,
-            );
-            result["draft"] = parsedDraft["draft"];
+          }
+          case "draft": {
+            result["draft"] = await checkParse("draft", value);
             break;
+          }
+          case "description": {
+            result["description"] = await checkParse("description", value);
+            break;
+          }
           default:
             console.warn("허용한 하지 않은 키입니다.");
             throw new Error("허용한 하지 않은 키입니다.");

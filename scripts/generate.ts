@@ -46,6 +46,7 @@ export const wrapContentToHtml = (title: string, content: string) => {
         </ul>
       </nav>
       <div class="markdown-body">${content}</div>
+      <footer class="footer"></footer>
     </div>
   </body>
 </html>`;

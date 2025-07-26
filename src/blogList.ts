@@ -1,8 +1,7 @@
 import type { MetaObject } from "../types/types";
 
 /**
- * @todo link 생성은 content를 의존해서 만들지 말기
- *   - 빌드 스텝에 마크다운 파일들에 대한 정보를 json으로 만들기
+ * 순수하게 ui를 만들기 위한 처리들만 함.
  */
 const blogList = (metaObjects: MetaObject[]) => {
   const ul = document.createElement("ul");
@@ -51,6 +50,14 @@ const blogList = (metaObjects: MetaObject[]) => {
     }
 
     constainer.appendChild(tagList);
+
+    const description = document.createElement("p");
+    description.classList.add("blog-description");
+
+    if (metaObject.description) {
+      description.innerText = metaObject.description;
+      constainer.appendChild(description);
+    }
 
     const line = document.createElement("hr");
     line.classList.add("blog-divider");

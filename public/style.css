@@ -70,6 +70,10 @@ body {
   color: #9198a1;
   margin: 8px 0 4px;
 }
+.blog-description {
+  color: #9198a1;
+  margin: 4px 0 4px;
+}
 .blog-divider {
   border: 0;
   height: 1px;
@@ -95,6 +99,9 @@ body {
   white-space: nowrap;
   text-align: center;
   color: #9198a1;
+}
+.footer {
+  height: 150px;
 }
 
 /* dark_dimmed */
