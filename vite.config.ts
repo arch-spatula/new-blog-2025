@@ -204,13 +204,24 @@ export default defineConfig(async ({}) => {
       fs: {
         allow: [path.resolve(__dirname), path.resolve(__dirname, "content")],
       },
+      rollupOptions: {
+        input: {
+          index: "index.html",
+          clipboard: path.resolve(__dirname, "src/clipboard.ts"),
+        },
+        output: {
+          entryFileNames: "[name].js",
+          chunkFileNames: "[name].js",
+          assetFileNames: "[name][extname]",
+        },
+      },
     },
     assetsInclude: ["**/*.md"],
     build: {
       rollupOptions: {
         input: {
           index: "index.html",
-          bar: path.resolve(__dirname, "src/bar.ts"),
+          clipboard: path.resolve(__dirname, "src/clipboard.ts"),
         },
         output: {
           entryFileNames: "[name].js",
