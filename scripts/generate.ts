@@ -48,8 +48,10 @@ export const wrapContentToHtml = (title: string, content: string) => {
       </nav>
       <div id="content" class="markdown-body">${content}</div>
       <footer class="footer"></footer>
-      <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
     </div>
+    <div id="search"></div>
+    <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
+    <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/search.ts" : "/search.js"}"></script>
   </body>
 </html>`;
 };
