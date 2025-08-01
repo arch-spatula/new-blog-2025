@@ -50,11 +50,11 @@ export const wrapContentToHtml = (title: string, content: string) => {
       <footer class="footer"></footer>
     </div>
     <div id="search"></div>
-    <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
-    <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/search.ts" : "/search.js"}"></script>
+    <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/main.ts" : "/index.js"}"></script>
   </body>
 </html>`;
 };
+//     <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
 
 /**
  * /foo/bar/baz.md -> baz.md
