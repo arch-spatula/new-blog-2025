@@ -54,7 +54,6 @@ export const wrapContentToHtml = (title: string, content: string) => {
   </body>
 </html>`;
 };
-//     <script type="module" src="${process.env.NODE_ENV === "development" ? "/src/clipboard.ts" : "/clipboard.js"}"></script>
 
 /**
  * /foo/bar/baz.md -> baz.md
