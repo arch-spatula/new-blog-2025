@@ -48,8 +48,8 @@ const addBtn = (id: string) => {
   });
 };
 
-const main = () => {
+const clipboard = () => {
   addBtn("content");
 };
 
-main();
+export default clipboard;

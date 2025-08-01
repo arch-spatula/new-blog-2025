@@ -1,4 +1,43 @@
+import type { Data } from "../types/types";
+
 let popupType: "none" | "search" = "none";
+let data: Data | null = null;
+
+const SEARCH_BLOG_LIST = `search-blog-list`;
+const SEARCH_TAG_LIST = `search-tag-list`;
+/**
+ * 상태 갱신을 여기서 처리하고
+ * 다른 곳에서 반영해야 함.
+ * @todo 성능 이슈가 생기면 trailing edge debounc 걸어두기
+ */
+const handleUpdateSearchInput = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+
+  const inputValue = input.value;
+
+  const searchList = document.querySelector<HTMLDivElement>(
+    `#${SEARCH_BLOG_LIST}`,
+  );
+
+  if (!searchList || !data) return;
+  if (inputValue === "") {
+    searchList.replaceChildren();
+    return;
+  }
+
+  searchList.replaceChildren();
+
+  data.blog
+    .filter((elem) =>
+      elem.title.toLowerCase().includes(input.value.toLowerCase()),
+    )
+    .forEach((elem) => {
+      const searchItem = document.createElement("li");
+      searchItem.innerText = elem.title;
+      searchItem.classList.add("search-item");
+      searchList.appendChild(searchItem);
+    });
+};
 
 /**
  * @todo form 제출 이벤트처리
@@ -21,6 +60,8 @@ const createSearchInput = () => {
   searchInput.name = "search";
   searchInput.placeholder = "Search";
 
+  searchInput.addEventListener("input", handleUpdateSearchInput);
+
   searchForm.appendChild(searchInput);
 
   const searchAction = document.createElement("div");
@@ -37,6 +78,13 @@ const focusSearchInput = () => {
   searchInput.focus();
 };
 
+const deleteSearchInput = () => {
+  const searchInput = document.querySelector<HTMLDivElement>(`#search-input`);
+  if (!searchInput) return;
+
+  searchInput.removeEventListener("input", handleUpdateSearchInput);
+};
+
 const SEARCH_POPUP = "search-popup" as const;
 const createPopup = () => {
   const popupWrapper = document.createElement("div");
@@ -46,6 +94,11 @@ const createPopup = () => {
   popupContainer.id = "popup-container";
 
   popupContainer.appendChild(createSearchInput());
+
+  const searchList = document.createElement("ul");
+  searchList.id = SEARCH_BLOG_LIST;
+
+  popupContainer.appendChild(searchList);
 
   popupWrapper.appendChild(popupContainer);
 
@@ -88,6 +141,7 @@ const deleteOverlay = () => {
 };
 
 const deletePopup = () => {
+  deleteSearchInput();
   const popupWrapper = document.querySelector<HTMLDivElement>(
     `#${SEARCH_POPUP}`,
   );
@@ -155,12 +209,12 @@ const handlePopup = (e: KeyboardEvent) => {
 /**
  * @todo `data.json`은 여기서 접근하기
  * - 나중에 `data.json`을 접근하는 파일을 단 한 곳에서만 관리하기
+ * 페이지에 1번 실행되고 페이지종료까지 남아 있어야 해서 removeEventListener 호출 안 함
  */
-const main = async () => {
+const search = async (_data: Data) => {
   window.addEventListener("keydown", handlePopup);
-  // window.addEventListener("beforeunload", () => {
-  //   window.removeEventListener("keydown", handlePopup);
-  // });
+
+  data = _data;
 };
 
-main();
+export default search;

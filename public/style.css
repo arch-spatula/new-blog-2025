@@ -137,6 +137,11 @@ body {
   font-size: 16px;
 }
 
+.search-item {
+  text-decoration: none;
+  list-style-type: none;
+}
+
 #search-form:has(#search-input:hover) {
   border: solid 1px #6cb6ff;
 }
@@ -204,12 +209,12 @@ body {
 
 .copy-btn {
   background-color: #9198a1 !important;
-  mask: url(public/clipboard.svg) no-repeat center !important;
+  mask: url(/clipboard.svg) no-repeat center !important;
 }
 
 .clicked-copy-btn {
   background-color: #478be6 !important;
-  mask: url(public/clipboard-check.svg) no-repeat center !important;
+  mask: url(/clipboard-check.svg) no-repeat center !important;
 }
 
 /* 

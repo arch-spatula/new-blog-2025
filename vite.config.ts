@@ -221,8 +221,6 @@ export default defineConfig(async ({}) => {
       rollupOptions: {
         input: {
           index: "index.html",
-          clipboard: path.resolve(__dirname, "src/clipboard.ts"),
-          search: path.resolve(__dirname, "src/search.ts"),
         },
         output: {
           entryFileNames: "[name].js",
