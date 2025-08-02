@@ -60,6 +60,9 @@ body {
 .blog-item {
   border-bottom: 1px solid #3d444db3;
 }
+.blog-item.hide {
+  display: none;
+}
 .blog-link {
   background-color: transparent;
   color: #478be6;
@@ -91,6 +94,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+}
+.tag-item:hover .tag-text {
+  color: #6cb6ff;
+}
+.selected-tag-item .tag-text {
+  color: #478be6;
 }
 .tag-text {
   font-size: 16px;
