@@ -7,16 +7,17 @@ const blogList = (metaObjects: MetaObject[]) => {
   const ul = document.createElement("ul");
   ul.classList.add("blog-list");
 
-  for (const metaObject of metaObjects) {
+  metaObjects.forEach((metaObject) => {
     const li = document.createElement("li");
     li.classList.add("blog-item");
+    li.dataset.id = metaObject.fileName;
 
     const constainer = document.createElement("div");
 
     const blogLink = document.createElement("a");
     blogLink.classList.add("blog-link");
 
-    if (!metaObject.htmlPath) continue;
+    if (!metaObject.htmlPath) return;
     const newPath = metaObject.htmlPath;
 
     blogLink.innerText = metaObject.title;
@@ -40,14 +41,6 @@ const blogList = (metaObjects: MetaObject[]) => {
         const tagItem = document.createElement("li");
         const p = document.createElement("span");
 
-        /**
-         * 새로고침했을 때 tag 확인하고 반영
-         * @todo tags가 있으면
-         */
-        const url = new URL(window.location.href);
-
-        const values = url.searchParams.getAll("tags");
-
         tagItem.addEventListener("click", () => {
           /**
            * 내부 스코프에서 새로 생성해야 가장 최신의 url 상태를 접근할 수 있음
@@ -60,14 +53,46 @@ const blogList = (metaObjects: MetaObject[]) => {
 
             url.searchParams.delete("tags", tag);
             window.history.pushState({}, "", url.toString());
+            // 보여줘야 할지 말지 상태처리
           } else {
             tagItem.classList.add("selected-tag-item");
-
             url.searchParams.append("tags", tag);
+            // 보여줘야 할지 말지 상태처리
             window.history.pushState({}, "", url.toString());
           }
+
+          // ul을 접근하고 li을 모두 순회
+          ul.childNodes.forEach((elem) => {
+            if (elem instanceof HTMLElement) {
+              /**
+               * 1개의 DOM요소도 못 찾으면 숨김
+               */
+              const checkSeletedTag = elem.querySelector(".selected-tag-item");
+
+              const url = new URL(window.location.href);
+
+              const values = url.searchParams.getAll("tags");
+
+              if (values.length === 0) {
+                elem.classList.remove("hide");
+                return;
+              }
+              if (!checkSeletedTag) {
+                elem.classList.add("hide");
+              } else {
+                elem.classList.remove("hide");
+              }
+            }
+          });
         });
 
+        /**
+         * 새로고침했을 때 tag 확인하고 반영
+         * @todo tags가 있으면
+         */
+        const url = new URL(window.location.href);
+
+        const values = url.searchParams.getAll("tags");
         if (values.includes(tag)) {
           tagItem.classList.add("selected-tag-item");
         }
@@ -99,7 +124,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     li.appendChild(constainer);
 
     ul.appendChild(li);
-  }
+  });
 
   return ul;
 };
