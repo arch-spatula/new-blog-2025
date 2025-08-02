@@ -60,6 +60,9 @@ body {
 .blog-item {
   border-bottom: 1px solid #3d444db3;
 }
+.blog-item.hide {
+  display: none;
+}
 .blog-link {
   background-color: transparent;
   color: #478be6;
