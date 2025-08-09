@@ -29,13 +29,14 @@ export const wrapContentToHtml = (title: string, content: string) => {
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <title>${title}</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <div id="app">
-      <nav class="nav">
+      <nav id="nav">
         <ul>
           <li class="blog-logo-container">
             <a href="/" class="blog-logo">
