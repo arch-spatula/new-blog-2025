@@ -1,11 +1,151 @@
 import type { MetaObject } from "../types/types";
 
 /**
+ * fileName이 무슨 tag를 갖고 있는지 알아낼 수 있음
+ * tag가 무슨 fileName에 달려있는지 알아낼 수 있음
+ * 실제 Node의 추가 삭제는 이루어지지 않고 탐색 후 해당 Node의 visable 혹은 active 상태만 제어함
+ */
+class Lookup {
+  isFiltered: boolean;
+  /**
+   * 목록에 있으면 랜더링 처리
+   */
+  showFileName: Set<string>;
+
+  /**
+   * 활성화 된 태그
+   */
+  activeTags: Set<string>;
+
+  /**
+   * fileName을 저장하고 fileName으로 갖고 있는 tag를 알아 낼 수 있음
+   */
+  fileNameMap: Map<string, Set<string>>;
+
+  /**
+   * tag을 저장하고 현재 tag를 갖고 있는 fileName을 알아 낼 수 있음
+   */
+  tagMap: Map<string, Set<string>>;
+
+  constructor() {
+    this.isFiltered = false;
+    this.fileNameMap = new Map();
+    this.tagMap = new Map();
+    this.showFileName = new Set();
+    this.activeTags = new Set();
+  }
+
+  filterOn() {
+    this.isFiltered = true;
+    this.showFileName.clear();
+  }
+
+  filterOff() {
+    this.isFiltered = false;
+    // 필터가 해제 되면 모든 것이 보여야 함.
+    this.fileNameMap.forEach((_, key) => {
+      this.showFileName.add(key);
+    });
+  }
+
+  toggleTag(tag: string) {
+    if (this.activeTags.has(tag)) {
+      this.removeActiveTag(tag);
+    } else {
+      this.addActiveTag(tag);
+    }
+  }
+
+  addActiveTag(tag: string) {
+    if (!this.activeTags.size) {
+      this.filterOn();
+    }
+    this.activeTags.add(tag);
+    this.activeTags.forEach((activeTag) => {
+      const fileNameSet = this.tagMap.get(activeTag);
+      if (!fileNameSet) return;
+      fileNameSet.forEach((fileName) => {
+        this.showFileName.add(fileName);
+      });
+    });
+  }
+
+  /**
+   * @todo 갱신되어 삭제해야 할 특정 원소만 찾아 삭제하기
+   */
+  removeActiveTag(tag: string) {
+    this.activeTags.delete(tag);
+
+    this.showFileName.clear();
+    this.activeTags.forEach((activeTag) => {
+      const fileNameSet = this.tagMap.get(activeTag);
+      if (!fileNameSet) return;
+      fileNameSet.forEach((fileName) => {
+        this.showFileName.add(fileName);
+      });
+    });
+
+    if (!this.activeTags.size) {
+      this.filterOff();
+    }
+  }
+
+  /**
+   * 모든 fileName과 tag의 관계를 최초로 만들어내는 시점
+   * @todo url에서 필터가 되어 있고 안 되어 있고 상태 반영하기
+   */
+  init(metaObjects: MetaObject[]) {
+    metaObjects.forEach((metaObject) => {
+      if (metaObject.tags?.length) {
+        metaObject.tags.forEach((tag) => {
+          this.addVertex(metaObject.fileName, tag);
+        });
+      } else {
+        this.addVertex(metaObject.fileName);
+      }
+    });
+    this.filterOff();
+  }
+
+  /**
+   * 양방향 노드
+   */
+  addVertex(fileNameNode: string, tagNode?: string) {
+    if (!tagNode) {
+      this.fileNameMap.set(fileNameNode, new Set());
+      return;
+    }
+
+    const tagSet = this.fileNameMap.get(fileNameNode);
+    if (tagSet) {
+      tagSet.add(tagNode);
+    } else {
+      this.fileNameMap.set(fileNameNode, new Set([tagNode]));
+    }
+
+    const fileNameSet = this.tagMap.get(tagNode);
+    if (fileNameSet) {
+      fileNameSet.add(fileNameNode);
+    } else {
+      this.tagMap.set(tagNode, new Set<string>([fileNameNode]));
+    }
+  }
+}
+/**
+ * blogList의 실행 종료 된 시점에 해제 되면 안 됨.
+ * - 메모리상 상태를 계속 살리기 위해 모듈 스코프에 인스턴스를 만들어둠.
+ * 유저의 클릭 이벤트가 있을 때마다 갱신되어야 함.
+ */
+const lookup = new Lookup();
+
+/**
  * 순수하게 ui를 만들기 위한 처리들만 함.
  */
 const blogList = (metaObjects: MetaObject[]) => {
   const ul = document.createElement("ul");
   ul.classList.add("blog-list");
+
+  lookup.init(metaObjects);
 
   metaObjects.forEach((metaObject) => {
     const li = document.createElement("li");
@@ -41,46 +181,50 @@ const blogList = (metaObjects: MetaObject[]) => {
         const tagItem = document.createElement("li");
         const p = document.createElement("span");
 
+        /**
+         * @todo url을 갱신해야 함.
+         */
         tagItem.addEventListener("click", () => {
-          /**
-           * 내부 스코프에서 새로 생성해야 가장 최신의 url 상태를 접근할 수 있음
-           */
-          const url = new URL(window.location.href);
+          // const url = new URL(window.location.href);
+          // const values = url.searchParams.getAll("tags");
+          //
+          // if (values.includes(tag)) {
+          //   url.searchParams.delete("tags", tag);
+          //   window.history.pushState({}, "", url.toString());
+          //
+          //   values.push(tag);
+          // } else {
+          //   url.searchParams.append("tags", tag);
+          //   window.history.pushState({}, "", url.toString());
+          //
+          //   values.splice(
+          //     values.findIndex((elem) => elem === tag),
+          //     1,
+          //   );
+          // }
 
-          const values = url.searchParams.getAll("tags");
-          if (values.includes(tag)) {
-            tagItem.classList.remove("selected-tag-item");
+          lookup.toggleTag(tag);
 
-            url.searchParams.delete("tags", tag);
-            window.history.pushState({}, "", url.toString());
-            // 보여줘야 할지 말지 상태처리
+          const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
+          if (lookup.activeTags.has(tag)) {
+            selectedTags.forEach((selectedTagElem) => {
+              selectedTagElem.classList.add("selected-tag-item");
+            });
           } else {
-            tagItem.classList.add("selected-tag-item");
-            url.searchParams.append("tags", tag);
-            // 보여줘야 할지 말지 상태처리
-            window.history.pushState({}, "", url.toString());
+            selectedTags.forEach((selectedTagElem) => {
+              selectedTagElem.classList.remove("selected-tag-item");
+            });
           }
 
-          // ul을 접근하고 li을 모두 순회
-          ul.childNodes.forEach((elem) => {
-            if (elem instanceof HTMLElement) {
-              /**
-               * 1개의 DOM요소도 못 찾으면 숨김
-               */
-              const checkSeletedTag = elem.querySelector(".selected-tag-item");
-
-              const url = new URL(window.location.href);
-
-              const values = url.searchParams.getAll("tags");
-
-              if (values.length === 0) {
-                elem.classList.remove("hide");
-                return;
-              }
-              if (!checkSeletedTag) {
-                elem.classList.add("hide");
+          const blogItems = document.querySelectorAll(".blog-item");
+          blogItems.forEach((blogItemElem) => {
+            if (blogItemElem instanceof HTMLLIElement) {
+              const id = blogItemElem.dataset.id;
+              if (!id) return;
+              if (lookup.showFileName.has(id)) {
+                blogItemElem.classList.remove("hide");
               } else {
-                elem.classList.remove("hide");
+                blogItemElem.classList.add("hide");
               }
             }
           });
@@ -90,17 +234,18 @@ const blogList = (metaObjects: MetaObject[]) => {
          * 새로고침했을 때 tag 확인하고 반영
          * @todo tags가 있으면
          */
-        const url = new URL(window.location.href);
-
-        const values = url.searchParams.getAll("tags");
-        if (values.includes(tag)) {
-          tagItem.classList.add("selected-tag-item");
-        }
+        // const url = new URL(window.location.href);
+        // //
+        // const values = url.searchParams.getAll("tags");
+        // if (values.includes(tag)) {
+        //   tagItem.classList.add("selected-tag-item");
+        // }
 
         tagItem.classList.add("tag-item");
         p.classList.add("tag-text");
         p.innerText = `#${tag}`;
         tagItem.appendChild(p);
+        tagItem.dataset.id = tag;
 
         tagList.appendChild(tagItem);
       });

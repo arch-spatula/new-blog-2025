@@ -4,7 +4,7 @@ let popupType: "none" | "search" = "none";
 let data: Data | null = null;
 
 const SEARCH_BLOG_LIST = `search-blog-list`;
-const SEARCH_TAG_LIST = `search-tag-list`;
+// const SEARCH_TAG_LIST = `search-tag-list`;
 /**
  * 상태 갱신을 여기서 처리하고
  * 다른 곳에서 반영해야 함.
