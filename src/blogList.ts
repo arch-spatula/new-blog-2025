@@ -90,6 +90,26 @@ class Lookup {
     }
   }
 
+  sycnTags(tags: string[]) {
+    this.activeTags.clear();
+    this.activeTags = new Set([...tags]);
+    this.sycnFileNameFromTag();
+
+    if (!this.activeTags.size) {
+      this.filterOff();
+    }
+  }
+  sycnFileNameFromTag() {
+    this.showFileName.clear();
+    this.activeTags.forEach((activeTag) => {
+      const fileNameSet = this.tagMap.get(activeTag);
+      if (!fileNameSet) return;
+      fileNameSet.forEach((fileName) => {
+        this.showFileName.add(fileName);
+      });
+    });
+  }
+
   /**
    * 모든 fileName과 tag의 관계를 최초로 만들어내는 시점
    * @todo url에서 필터가 되어 있고 안 되어 있고 상태 반영하기
@@ -138,6 +158,7 @@ class Lookup {
  * 유저의 클릭 이벤트가 있을 때마다 갱신되어야 함.
  */
 const lookup = new Lookup();
+const EventBus = new EventTarget();
 
 class URLBinding {
   tags: Set<string>;
@@ -159,14 +180,16 @@ class URLBinding {
   /**
    * URL 변경 시 실행할 로직
    * this binding이 window로 변경될 것을 방지하기 위해 화살표 함수로 정의함
+   * @todo 뒤로가기를 눌렀을 때 모든 상태 동기화
    */
-  handleUrlChange = () => {
-    console.log(
-      "URL이 변경됨:",
-      window.location.href,
-      lookup.activeTags,
-      this.tags,
-      this.readTags(),
+  handleUrlChange = (e?: Event) => {
+    EventBus.dispatchEvent(
+      new CustomEvent("url:change", {
+        detail: {
+          tags: this.readTags(),
+          isBackBtn: e instanceof PopStateEvent,
+        },
+      }),
     );
   };
 
@@ -230,6 +253,39 @@ const updateBlogListUI = async (tag: string) => {
   });
 };
 
+const updateBlogListUIOnece = async () => {
+  // 1번만 처리할 것을 알아서 추가된 클래스들 제거
+  lookup.tagMap.forEach((_, tag) => {
+    const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
+    selectedTags.forEach((selectedTag) => {
+      selectedTag.classList.remove("selected-tag-item");
+    });
+  });
+
+  const blogItems = document.querySelectorAll(".blog-item.hide");
+  blogItems.forEach((blogItem) => {
+    blogItem.classList.remove("hide");
+  });
+
+  lookup.activeTags.forEach((tag) => {
+    const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
+    selectedTags.forEach((selectedTag) => {
+      selectedTag.classList.add("selected-tag-item");
+    });
+  });
+
+  // 모든 파일이름을 접근
+  lookup.fileNameMap.forEach((_, fileName) => {
+    // 보여줘야 할 파일 목록을 확인해서 없으면
+    if (lookup.showFileName.has(fileName) || !lookup.showFileName.size) return;
+    // DOM 요소를 선택해서
+    const blogItems = document.querySelector(`[data-id="${fileName}"]`);
+    if (!blogItems) return;
+    // 숨김처리
+    blogItems.classList.add("hide");
+  });
+};
+
 const urlBinding = new URLBinding();
 
 /**
@@ -243,9 +299,29 @@ class TagMediator {
   constructor(urlBinding: URLBinding, lookup: Lookup) {
     this.urlBinding = urlBinding;
     this.lookup = lookup;
+    EventBus.addEventListener("url:change", (e) => {
+      const customEvent = e as CustomEvent<{
+        tags: string[];
+        isBackBtn: boolean;
+      }>;
+      if (!customEvent.detail) return;
+      /**
+       * 여기 값이 절대 진리 값
+       * 순회하고
+       * 동기화하고
+       * ui에 내용 반영
+       */
+      const tags = customEvent.detail.tags;
+      this.urlBinding.tags = new Set([...tags]);
+      this.lookup.sycnTags(tags);
+
+      const isBack = customEvent.detail.isBackBtn;
+      if (isBack) {
+        updateBlogListUIOnece();
+      }
+    });
   }
   init(metaObjects: MetaObject[]) {
-
     /**
      * main 함수 실행 이후 callback queue에 등록하고 실행하는 것으로 main 호출 이후 실행시킴
      * setTimeout을 동기적으로 실행하면 UI에 DOM 없는 시점에 실행해서 tag의 활성화 상태가 반영 안 됨.
