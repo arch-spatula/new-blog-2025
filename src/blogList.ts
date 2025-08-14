@@ -131,6 +131,7 @@ class Lookup {
     }
   }
 }
+
 /**
  * blogList의 실행 종료 된 시점에 해제 되면 안 됨.
  * - 메모리상 상태를 계속 살리기 위해 모듈 스코프에 인스턴스를 만들어둠.
@@ -138,14 +139,140 @@ class Lookup {
  */
 const lookup = new Lookup();
 
+class URLBinding {
+  tags: Set<string>;
+  constructor() {
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+    this.tags = new Set([...values]);
+
+    // popstate는 뒤로/앞으로 가기 버튼을 눌렀을 때 호출됨
+    window.addEventListener("popstate", this.handleUrlChange);
+  }
+
+  readTags = () => {
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+    return values;
+  };
+
+  /**
+   * URL 변경 시 실행할 로직
+   * this binding이 window로 변경될 것을 방지하기 위해 화살표 함수로 정의함
+   */
+  handleUrlChange = () => {
+    console.log(
+      "URL이 변경됨:",
+      window.location.href,
+      lookup.activeTags,
+      this.tags,
+      this.readTags(),
+    );
+  };
+
+  // pushState/replaceState 후에도 직접 호출해서 동기화
+  changeUrl(url: string) {
+    window.history.pushState({}, "", url);
+    this.handleUrlChange();
+  }
+
+  addTag(tag: string) {
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+    if (!values.includes(tag) && !this.tags.has(tag)) {
+      url.searchParams.append("tags", tag);
+      this.changeUrl(url.toString());
+      this.tags.add(tag);
+    }
+  }
+  removeTag(tag: string) {
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+
+    if (values.includes(tag) && this.tags.has(tag)) {
+      url.searchParams.delete("tags", tag);
+      this.changeUrl(url.toString());
+      this.tags.delete(tag);
+    }
+  }
+  toggleTag(tag: string) {
+    if (!this.tags.has(tag)) {
+      this.addTag(tag);
+    } else {
+      this.removeTag(tag);
+    }
+  }
+}
+
+const updateBlogListUI = async (tag: string) => {
+  const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
+  if (lookup.activeTags.has(tag)) {
+    selectedTags.forEach((selectedTagElem) => {
+      selectedTagElem.classList.add("selected-tag-item");
+    });
+  } else {
+    selectedTags.forEach((selectedTagElem) => {
+      selectedTagElem.classList.remove("selected-tag-item");
+    });
+  }
+
+  const blogItems = document.querySelectorAll(".blog-item");
+  blogItems.forEach((blogItemElem) => {
+    if (blogItemElem instanceof HTMLLIElement) {
+      const id = blogItemElem.dataset.id;
+      if (!id) return;
+      if (lookup.showFileName.has(id)) {
+        blogItemElem.classList.remove("hide");
+      } else {
+        blogItemElem.classList.add("hide");
+      }
+    }
+  });
+};
+
+const urlBinding = new URLBinding();
+
+/**
+ * Lookup의 activeTags와 URLBinding의 tags 동기화를 중재함
+ * 브라우저 url을 메모리에 가져옴
+ * 무슨 태그가 올바른지 판단을 먼저 해야 함
+ */
+class TagMediator {
+  urlBinding: URLBinding;
+  lookup: Lookup;
+  constructor(urlBinding: URLBinding, lookup: Lookup) {
+    this.urlBinding = urlBinding;
+    this.lookup = lookup;
+  }
+  init(metaObjects: MetaObject[]) {
+
+    /**
+     * main 함수 실행 이후 callback queue에 등록하고 실행하는 것으로 main 호출 이후 실행시킴
+     * setTimeout을 동기적으로 실행하면 UI에 DOM 없는 시점에 실행해서 tag의 활성화 상태가 반영 안 됨.
+     */
+    setTimeout(() => {
+      this.lookup.init(metaObjects);
+      this.urlBinding.tags.forEach((tag) => {
+        this.lookup.toggleTag(tag);
+        updateBlogListUI(tag);
+      });
+    }, 0);
+  }
+  toggleTag(tag: string) {
+    this.lookup.toggleTag(tag);
+    this.urlBinding.toggleTag(tag);
+    updateBlogListUI(tag);
+  }
+}
+
+const tagMediator = new TagMediator(urlBinding, lookup);
+
 /**
  * 순수하게 ui를 만들기 위한 처리들만 함.
  */
 const blogList = (metaObjects: MetaObject[]) => {
   const ul = document.createElement("ul");
   ul.classList.add("blog-list");
-
-  lookup.init(metaObjects);
 
   metaObjects.forEach((metaObject) => {
     const li = document.createElement("li");
@@ -181,65 +308,9 @@ const blogList = (metaObjects: MetaObject[]) => {
         const tagItem = document.createElement("li");
         const p = document.createElement("span");
 
-        /**
-         * @todo url을 갱신해야 함.
-         */
         tagItem.addEventListener("click", () => {
-          // const url = new URL(window.location.href);
-          // const values = url.searchParams.getAll("tags");
-          //
-          // if (values.includes(tag)) {
-          //   url.searchParams.delete("tags", tag);
-          //   window.history.pushState({}, "", url.toString());
-          //
-          //   values.push(tag);
-          // } else {
-          //   url.searchParams.append("tags", tag);
-          //   window.history.pushState({}, "", url.toString());
-          //
-          //   values.splice(
-          //     values.findIndex((elem) => elem === tag),
-          //     1,
-          //   );
-          // }
-
-          lookup.toggleTag(tag);
-
-          const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
-          if (lookup.activeTags.has(tag)) {
-            selectedTags.forEach((selectedTagElem) => {
-              selectedTagElem.classList.add("selected-tag-item");
-            });
-          } else {
-            selectedTags.forEach((selectedTagElem) => {
-              selectedTagElem.classList.remove("selected-tag-item");
-            });
-          }
-
-          const blogItems = document.querySelectorAll(".blog-item");
-          blogItems.forEach((blogItemElem) => {
-            if (blogItemElem instanceof HTMLLIElement) {
-              const id = blogItemElem.dataset.id;
-              if (!id) return;
-              if (lookup.showFileName.has(id)) {
-                blogItemElem.classList.remove("hide");
-              } else {
-                blogItemElem.classList.add("hide");
-              }
-            }
-          });
+          tagMediator.toggleTag(tag);
         });
-
-        /**
-         * 새로고침했을 때 tag 확인하고 반영
-         * @todo tags가 있으면
-         */
-        // const url = new URL(window.location.href);
-        // //
-        // const values = url.searchParams.getAll("tags");
-        // if (values.includes(tag)) {
-        //   tagItem.classList.add("selected-tag-item");
-        // }
 
         tagItem.classList.add("tag-item");
         p.classList.add("tag-text");
@@ -270,6 +341,8 @@ const blogList = (metaObjects: MetaObject[]) => {
 
     ul.appendChild(li);
   });
+
+  tagMediator.init(metaObjects);
 
   return ul;
 };
