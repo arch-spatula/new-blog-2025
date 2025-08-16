@@ -10,7 +10,7 @@
 import type { Data } from "../types/types";
 
 let popupType: "none" | "search" = "none";
-let data: Data | null = null;
+let searchData: Data | null = null;
 const tagMap = new Map<string, number>();
 const SEARCH_BLOG_LIST = `search-blog-list`;
 const SEARCH_TAG_LIST = `search-tag-list`;
@@ -29,7 +29,7 @@ const handleUpdateSearchInput = (e: Event) => {
     `#${SEARCH_BLOG_LIST}`,
   );
 
-  if (!searchList || !data) return;
+  if (!searchList || !searchData) return;
   if (inputValue === "") {
     searchList.replaceChildren();
     return;
@@ -37,7 +37,7 @@ const handleUpdateSearchInput = (e: Event) => {
 
   searchList.replaceChildren();
 
-  data.blog
+  searchData.blog
     .filter((elem) =>
       elem.title.toLowerCase().includes(input.value.toLowerCase()),
     )
@@ -105,12 +105,38 @@ const createPopup = () => {
 
   popupContainer.appendChild(createSearchInput());
 
+  const url = new URL(window.location.href);
+  url.searchParams.set("search", "open");
+
   const tagList = document.createElement("ul");
   tagList.id = SEARCH_TAG_LIST;
   tagMap.forEach((tagCount, tag) => {
     const tagItem = document.createElement("li");
+    tagItem.classList.add("search-tag-item");
 
-    tagItem.innerText = `#${tag} - ${tagCount}`;
+    const link = document.createElement("a");
+    link.classList.add("tag-link");
+    link.innerText = `#${tag} - ${tagCount}`;
+
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+    url.searchParams.set("search", "open");
+
+    if (values.includes(tag)) {
+      url.searchParams.delete("tags", tag);
+      link.classList.add("selected");
+      if (url.search) {
+        link.href = url.search;
+      } else {
+        link.href = `/`;
+      }
+    } else {
+      url.searchParams.append("tags", tag);
+      link.href = url.search;
+    }
+
+    tagItem.appendChild(link);
+
     tagList.appendChild(tagItem);
   });
   popupContainer.appendChild(tagList);
@@ -246,8 +272,8 @@ const handlePopup = (e: KeyboardEvent) => {
  * 페이지에 1번 실행되고 페이지종료까지 남아 있어야 해서 removeEventListener 호출 안 함
  * - 새로고침 등 새롭게 html 리소스를 가져올 때(full page reload) 자동으로 해제됨.
  */
-const search = async (_data: Data) => {
-  _data.blog.forEach((metaObject) => {
+const search = async (data: Data) => {
+  data.blog.forEach((metaObject) => {
     if (!metaObject.tags) return;
     metaObject.tags.forEach((tag) => {
       const tagCount = tagMap.get(tag);
@@ -282,7 +308,7 @@ const search = async (_data: Data) => {
       break;
   }
 
-  data = _data;
+  searchData = data;
 };
 
 export default search;
