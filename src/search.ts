@@ -1,10 +1,20 @@
+/**
+ * @fileoverview ctrl + k로 볼 수 있는 창을 다룸
+ *
+ * @todo 날짜 범위 표시도 가능해야 함.
+ * @todo 키보드 입력은 SPA로 data.json을 활용
+ * @todo enter 하면 목록 첫번째로 자동 이동
+ * @todo url에 입력 내용 보존
+ */
+
 import type { Data } from "../types/types";
 
 let popupType: "none" | "search" = "none";
-let data: Data | null = null;
-
+let searchData: Data | null = null;
+const tagMap = new Map<string, number>();
 const SEARCH_BLOG_LIST = `search-blog-list`;
-// const SEARCH_TAG_LIST = `search-tag-list`;
+const SEARCH_TAG_LIST = `search-tag-list`;
+
 /**
  * 상태 갱신을 여기서 처리하고
  * 다른 곳에서 반영해야 함.
@@ -19,7 +29,7 @@ const handleUpdateSearchInput = (e: Event) => {
     `#${SEARCH_BLOG_LIST}`,
   );
 
-  if (!searchList || !data) return;
+  if (!searchList || !searchData) return;
   if (inputValue === "") {
     searchList.replaceChildren();
     return;
@@ -27,7 +37,7 @@ const handleUpdateSearchInput = (e: Event) => {
 
   searchList.replaceChildren();
 
-  data.blog
+  searchData.blog
     .filter((elem) =>
       elem.title.toLowerCase().includes(input.value.toLowerCase()),
     )
@@ -95,6 +105,42 @@ const createPopup = () => {
 
   popupContainer.appendChild(createSearchInput());
 
+  const url = new URL(window.location.href);
+  url.searchParams.set("search", "open");
+
+  const tagList = document.createElement("ul");
+  tagList.id = SEARCH_TAG_LIST;
+  tagMap.forEach((tagCount, tag) => {
+    const tagItem = document.createElement("li");
+    tagItem.classList.add("search-tag-item");
+
+    const link = document.createElement("a");
+    link.classList.add("tag-link");
+    link.innerText = `#${tag} - ${tagCount}`;
+
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("tags");
+    url.searchParams.set("search", "open");
+
+    if (values.includes(tag)) {
+      url.searchParams.delete("tags", tag);
+      link.classList.add("selected");
+      if (url.search) {
+        link.href = url.search;
+      } else {
+        link.href = `/`;
+      }
+    } else {
+      url.searchParams.append("tags", tag);
+      link.href = url.search;
+    }
+
+    tagItem.appendChild(link);
+
+    tagList.appendChild(tagItem);
+  });
+  popupContainer.appendChild(tagList);
+
   const searchList = document.createElement("ul");
   searchList.id = SEARCH_BLOG_LIST;
 
@@ -112,9 +158,14 @@ const handleClickOverlay = (e: MouseEvent) => {
   e.preventDefault();
   switch (popupType) {
     case "search": {
+      const url = new URL(window.location.href);
+      url.searchParams.set("search", "close");
+      window.history.pushState({}, "", url);
+
       deleteOverlay();
       deletePopup();
       popupType = "none";
+
       break;
     }
     case "none": {
@@ -170,6 +221,10 @@ const handlePopup = (e: KeyboardEvent) => {
         search.appendChild(createPopup());
         search.appendChild(createOverlay());
         focusSearchInput();
+        // url에 search open 추가
+        const url = new URL(window.location.href);
+        url.searchParams.set("search", "open");
+        window.history.pushState({}, "", url);
 
         popupType = "search";
         break;
@@ -188,6 +243,11 @@ const handlePopup = (e: KeyboardEvent) => {
       e.preventDefault();
       deleteOverlay();
       deletePopup();
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("search", "close");
+      window.history.pushState({}, "", url);
+
       popupType = "none";
       break;
     }
@@ -210,11 +270,45 @@ const handlePopup = (e: KeyboardEvent) => {
  * @todo `data.json`은 여기서 접근하기
  * - 나중에 `data.json`을 접근하는 파일을 단 한 곳에서만 관리하기
  * 페이지에 1번 실행되고 페이지종료까지 남아 있어야 해서 removeEventListener 호출 안 함
+ * - 새로고침 등 새롭게 html 리소스를 가져올 때(full page reload) 자동으로 해제됨.
  */
-const search = async (_data: Data) => {
+const search = async (data: Data) => {
+  data.blog.forEach((metaObject) => {
+    if (!metaObject.tags) return;
+    metaObject.tags.forEach((tag) => {
+      const tagCount = tagMap.get(tag);
+      if (tagCount) {
+        tagMap.set(tag, tagCount + 1);
+      } else {
+        tagMap.set(tag, 1);
+      }
+    });
+  });
+
   window.addEventListener("keydown", handlePopup);
 
-  data = _data;
+  const searchElem = document.querySelector<HTMLDivElement>("#search");
+
+  if (!searchElem) return;
+  const url = new URL(window.location.href);
+  const search = url.searchParams.get("search");
+  switch (search) {
+    case "open":
+      searchElem.appendChild(createPopup());
+      searchElem.appendChild(createOverlay());
+      focusSearchInput();
+
+      popupType = "search";
+      break;
+    case "close":
+      break;
+    case null:
+      break;
+    default:
+      break;
+  }
+
+  searchData = data;
 };
 
 export default search;

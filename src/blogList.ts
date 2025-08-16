@@ -131,6 +131,7 @@ class Lookup {
     }
   }
 }
+
 /**
  * blogList의 실행 종료 된 시점에 해제 되면 안 됨.
  * - 메모리상 상태를 계속 살리기 위해 모듈 스코프에 인스턴스를 만들어둠.
@@ -146,9 +147,17 @@ const blogList = (metaObjects: MetaObject[]) => {
   ul.classList.add("blog-list");
 
   lookup.init(metaObjects);
+  const url = new URL(window.location.href);
+  const tags = url.searchParams.getAll("tags");
+  tags.forEach((tag) => {
+    lookup.toggleTag(tag);
+  });
 
   metaObjects.forEach((metaObject) => {
     const li = document.createElement("li");
+    if (!lookup.showFileName.has(metaObject.fileName)) {
+      li.classList.add("hide");
+    }
     li.classList.add("blog-item");
     li.dataset.id = metaObject.fileName;
 
@@ -161,7 +170,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     const newPath = metaObject.htmlPath;
 
     blogLink.innerText = metaObject.title;
-    blogLink.href = newPath;
+    blogLink.href = `${newPath}${url.search}`;
 
     constainer.appendChild(blogLink);
 
@@ -179,72 +188,31 @@ const blogList = (metaObjects: MetaObject[]) => {
     if (metaObject.tags?.length) {
       metaObject.tags.forEach((tag) => {
         const tagItem = document.createElement("li");
-        const p = document.createElement("span");
-
-        /**
-         * @todo url을 갱신해야 함.
-         */
-        tagItem.addEventListener("click", () => {
-          // const url = new URL(window.location.href);
-          // const values = url.searchParams.getAll("tags");
-          //
-          // if (values.includes(tag)) {
-          //   url.searchParams.delete("tags", tag);
-          //   window.history.pushState({}, "", url.toString());
-          //
-          //   values.push(tag);
-          // } else {
-          //   url.searchParams.append("tags", tag);
-          //   window.history.pushState({}, "", url.toString());
-          //
-          //   values.splice(
-          //     values.findIndex((elem) => elem === tag),
-          //     1,
-          //   );
-          // }
-
-          lookup.toggleTag(tag);
-
-          const selectedTags = document.querySelectorAll(`[data-id="${tag}"]`);
-          if (lookup.activeTags.has(tag)) {
-            selectedTags.forEach((selectedTagElem) => {
-              selectedTagElem.classList.add("selected-tag-item");
-            });
-          } else {
-            selectedTags.forEach((selectedTagElem) => {
-              selectedTagElem.classList.remove("selected-tag-item");
-            });
-          }
-
-          const blogItems = document.querySelectorAll(".blog-item");
-          blogItems.forEach((blogItemElem) => {
-            if (blogItemElem instanceof HTMLLIElement) {
-              const id = blogItemElem.dataset.id;
-              if (!id) return;
-              if (lookup.showFileName.has(id)) {
-                blogItemElem.classList.remove("hide");
-              } else {
-                blogItemElem.classList.add("hide");
-              }
-            }
-          });
-        });
-
-        /**
-         * 새로고침했을 때 tag 확인하고 반영
-         * @todo tags가 있으면
-         */
-        // const url = new URL(window.location.href);
-        // //
-        // const values = url.searchParams.getAll("tags");
-        // if (values.includes(tag)) {
-        //   tagItem.classList.add("selected-tag-item");
-        // }
+        const tagLink = document.createElement("a");
 
         tagItem.classList.add("tag-item");
-        p.classList.add("tag-text");
-        p.innerText = `#${tag}`;
-        tagItem.appendChild(p);
+        if (lookup.activeTags.has(tag)) {
+          tagItem.classList.add("selected-tag-item");
+        }
+        tagLink.classList.add("tag-text");
+        tagLink.innerText = `#${tag}`;
+
+        const url = new URL(window.location.href);
+        const values = url.searchParams.getAll("tags");
+
+        if (values.includes(tag)) {
+          url.searchParams.delete("tags", tag);
+          if (url.search) {
+            tagLink.href = url.search;
+          } else {
+            tagLink.href = `/`;
+          }
+        } else {
+          url.searchParams.append("tags", tag);
+          tagLink.href = `${url.search}`;
+        }
+
+        tagItem.appendChild(tagLink);
         tagItem.dataset.id = tag;
 
         tagList.appendChild(tagItem);
