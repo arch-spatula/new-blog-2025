@@ -22,6 +22,7 @@ const nav = () => {
   const logo = document.createElement("li");
   logo.classList.add("blog-logo-container");
   const homeLink = document.createElement("a");
+  homeLink.classList.add("blog-logo");
 
   const url = new URL(window.location.href);
   url.searchParams.delete("search");
