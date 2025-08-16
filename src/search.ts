@@ -1,3 +1,12 @@
+/**
+ * @fileoverview ctrl + k로 볼 수 있는 창을 다룸
+ *
+ * @todo 날짜 범위 표시도 가능해야 함.
+ * @todo 키보드 입력은 SPA로 data.json을 활용
+ * @todo enter 하면 목록 첫번째로 자동 이동
+ * @todo url에 입력 내용 보존
+ */
+
 import type { Data } from "../types/types";
 
 let popupType: "none" | "search" = "none";
@@ -5,6 +14,7 @@ let data: Data | null = null;
 
 const SEARCH_BLOG_LIST = `search-blog-list`;
 // const SEARCH_TAG_LIST = `search-tag-list`;
+
 /**
  * 상태 갱신을 여기서 처리하고
  * 다른 곳에서 반영해야 함.
@@ -210,9 +220,23 @@ const handlePopup = (e: KeyboardEvent) => {
  * @todo `data.json`은 여기서 접근하기
  * - 나중에 `data.json`을 접근하는 파일을 단 한 곳에서만 관리하기
  * 페이지에 1번 실행되고 페이지종료까지 남아 있어야 해서 removeEventListener 호출 안 함
+ * - 새로고침 등 새롭게 html 리소스를 가져올 때(full page reload) 자동으로 해제됨.
  */
 const search = async (_data: Data) => {
   window.addEventListener("keydown", handlePopup);
+
+  const url = new URL(window.location.href);
+  const search = url.searchParams.get("search");
+  switch (search) {
+    case "open":
+      break;
+    case "close":
+      break;
+    case null:
+      break;
+    default:
+      break;
+  }
 
   data = _data;
 };
