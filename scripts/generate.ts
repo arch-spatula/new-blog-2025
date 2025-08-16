@@ -37,15 +37,6 @@ export const wrapContentToHtml = (title: string, content: string) => {
   <body>
     <div id="app">
       <nav id="nav">
-        <ul>
-          <li class="blog-logo-container">
-            <a href="/" class="blog-logo">
-              <img class="logo-img" src="/vite.svg" alt="blog logo" />
-              <p>home</p>
-            </a>
-          </li>
-          <li><a href="https://github.com" target="_blank">GitHub</a></li>
-        </ul>
       </nav>
       <div id="content" class="markdown-body">${content}</div>
       <footer class="footer"></footer>

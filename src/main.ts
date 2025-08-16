@@ -1,6 +1,7 @@
 import type { Data } from "../types/types";
 import blogList from "./blogList";
 import clipboard from "./clipboard";
+import nav from "./nav";
 import search from "./search";
 
 const main = async () => {
@@ -10,6 +11,7 @@ const main = async () => {
 
   await search(data);
   clipboard();
+  nav();
 
   if (app && window.location.pathname === "/") {
     app.appendChild(blogList(data.blog));
