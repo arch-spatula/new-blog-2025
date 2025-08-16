@@ -11,9 +11,9 @@ import type { Data } from "../types/types";
 
 let popupType: "none" | "search" = "none";
 let data: Data | null = null;
-
+const tagMap = new Map<string, number>();
 const SEARCH_BLOG_LIST = `search-blog-list`;
-// const SEARCH_TAG_LIST = `search-tag-list`;
+const SEARCH_TAG_LIST = `search-tag-list`;
 
 /**
  * 상태 갱신을 여기서 처리하고
@@ -105,6 +105,16 @@ const createPopup = () => {
 
   popupContainer.appendChild(createSearchInput());
 
+  const tagList = document.createElement("ul");
+  tagList.id = SEARCH_TAG_LIST;
+  tagMap.forEach((tagCount, tag) => {
+    const tagItem = document.createElement("li");
+
+    tagItem.innerText = `#${tag} - ${tagCount}`;
+    tagList.appendChild(tagItem);
+  });
+  popupContainer.appendChild(tagList);
+
   const searchList = document.createElement("ul");
   searchList.id = SEARCH_BLOG_LIST;
 
@@ -122,9 +132,14 @@ const handleClickOverlay = (e: MouseEvent) => {
   e.preventDefault();
   switch (popupType) {
     case "search": {
+      const url = new URL(window.location.href);
+      url.searchParams.set("search", "close");
+      window.history.pushState({}, "", url);
+
       deleteOverlay();
       deletePopup();
       popupType = "none";
+
       break;
     }
     case "none": {
@@ -180,6 +195,10 @@ const handlePopup = (e: KeyboardEvent) => {
         search.appendChild(createPopup());
         search.appendChild(createOverlay());
         focusSearchInput();
+        // url에 search open 추가
+        const url = new URL(window.location.href);
+        url.searchParams.set("search", "open");
+        window.history.pushState({}, "", url);
 
         popupType = "search";
         break;
@@ -198,6 +217,11 @@ const handlePopup = (e: KeyboardEvent) => {
       e.preventDefault();
       deleteOverlay();
       deletePopup();
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("search", "close");
+      window.history.pushState({}, "", url);
+
       popupType = "none";
       break;
     }
@@ -223,12 +247,32 @@ const handlePopup = (e: KeyboardEvent) => {
  * - 새로고침 등 새롭게 html 리소스를 가져올 때(full page reload) 자동으로 해제됨.
  */
 const search = async (_data: Data) => {
+  _data.blog.forEach((metaObject) => {
+    if (!metaObject.tags) return;
+    metaObject.tags.forEach((tag) => {
+      const tagCount = tagMap.get(tag);
+      if (tagCount) {
+        tagMap.set(tag, tagCount + 1);
+      } else {
+        tagMap.set(tag, 1);
+      }
+    });
+  });
+
   window.addEventListener("keydown", handlePopup);
 
+  const searchElem = document.querySelector<HTMLDivElement>("#search");
+
+  if (!searchElem) return;
   const url = new URL(window.location.href);
   const search = url.searchParams.get("search");
   switch (search) {
     case "open":
+      searchElem.appendChild(createPopup());
+      searchElem.appendChild(createOverlay());
+      focusSearchInput();
+
+      popupType = "search";
       break;
     case "close":
       break;
