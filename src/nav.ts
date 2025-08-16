@@ -24,6 +24,7 @@ const nav = () => {
   const homeLink = document.createElement("a");
 
   const url = new URL(window.location.href);
+  url.searchParams.delete("search");
   homeLink.href = `/${url.search}`;
 
   const logoImg = document.createElement("img");

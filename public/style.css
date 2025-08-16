@@ -170,6 +170,17 @@ body {
     brightness(95%) contrast(90%);
 }
 
+#search-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0 0;
+}
+#search-tag-list li {
+  text-decoration: none;
+  list-style-type: none;
+}
+
 #overlay {
   position: absolute;
   top: 0;
