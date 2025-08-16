@@ -170,7 +170,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     const newPath = metaObject.htmlPath;
 
     blogLink.innerText = metaObject.title;
-    blogLink.href = newPath;
+    blogLink.href = `${newPath}${url.search}`;
 
     constainer.appendChild(blogLink);
 
@@ -203,7 +203,7 @@ const blogList = (metaObjects: MetaObject[]) => {
         if (values.includes(tag)) {
           url.searchParams.delete("tags", tag);
           if (url.search) {
-            tagLink.href = `${url.search}`;
+            tagLink.href = url.search;
           } else {
             tagLink.href = `/`;
           }
