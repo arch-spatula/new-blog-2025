@@ -187,12 +187,12 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 #popup-container #search-blog-list .search-item .search-item-link:hover {
-  color: #6cb6ff;
-  border: solid 1px #6cb6ff;
+  color: #478be6;
+  border: solid 1px #478be6;
 }
 #popup-container #search-blog-list .search-item .search-item-focus {
-  color: #6cb6ff;
-  border: solid 1px #6cb6ff;
+  color: #478be6;
+  border: solid 1px #478be6;
 }
 
 #search-form:has(#search-input:hover) {
