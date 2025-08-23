@@ -270,6 +270,30 @@ body {
 code > .line > span:last-child {
   padding: 0 16px 0 0;
 }
+#popup-btn {
+  all: unset;
+  display: flex;
+  background-color: #262c36;
+  color: #9198a1;
+  height: 40px;
+  width: 160px;
+  padding: 0 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border: solid 1px #3d444db3;
+  box-sizing: border-box;
+}
+
+#popup-btn .icon {
+  margin: 4px;
+  filter: invert(62%) sepia(14%) saturate(192%) hue-rotate(174deg)
+    brightness(93%) contrast(94%);
+  width: 16px;
+  height: 16px;
+}
 
 /* dark_dimmed */
 .markdown-body {

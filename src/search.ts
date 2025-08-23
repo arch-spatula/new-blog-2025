@@ -8,6 +8,7 @@
  */
 
 import type { Data } from "../types/types";
+import PopupBus from "./search-popup-bus";
 
 let popupType: "none" | "search" = "none";
 let searchData: Data | null = null;
@@ -307,6 +308,19 @@ const search = async (data: Data) => {
     default:
       break;
   }
+
+  const popupBus = PopupBus.getInstance();
+  popupBus.on("click", () => {
+    searchElem.appendChild(createPopup());
+    searchElem.appendChild(createOverlay());
+    focusSearchInput();
+    // url에 search open 추가
+    const url = new URL(window.location.href);
+    url.searchParams.set("search", "open");
+    window.history.pushState({}, "", url);
+
+    popupType = "search";
+  });
 
   searchData = data;
 };
