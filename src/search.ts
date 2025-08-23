@@ -7,7 +7,7 @@
  * @todo url에 입력 내용 보존
  */
 
-import type { Data } from "../types/types";
+import type { Data, MetaObject } from "../types/types";
 import PopupBus from "./search-popup-bus";
 
 let popupType: "none" | "search" = "none";
@@ -16,6 +16,48 @@ const tagMap = new Map<string, number>();
 const SEARCH_BLOG_LIST = `search-blog-list`;
 const SEARCH_TAG_LIST = `search-tag-list`;
 
+// let selectedSearchIdx = 0;
+class BlogList {
+  selectedIdx: number;
+  private allBlogList: MetaObject[];
+  filteredBlogList: MetaObject[];
+  constructor() {
+    this.selectedIdx = 0;
+    this.allBlogList = [];
+    this.filteredBlogList = [];
+  }
+  init = (blogList: MetaObject[]) => {
+    this.allBlogList = blogList;
+  };
+  setFilterBlogList = (input: string) => {
+    const filteredBlogList = this.allBlogList.filter((elem) => {
+      return elem.title.toLowerCase().includes(input.toLowerCase());
+    });
+    this.filteredBlogList = filteredBlogList;
+    return this.filteredBlogList;
+  };
+  selectedBlogList = () => {
+    return this.filteredBlogList[this.selectedIdx];
+  };
+  resetIdx = () => {
+    this.selectedIdx = 0;
+  };
+  incrementIdx = () => {
+    if (this.selectedIdx + 1 > this.filteredBlogList.length - 1) {
+      this.resetIdx();
+      return;
+    }
+    this.selectedIdx += 1;
+  };
+  decrementIdx = () => {
+    if (this.selectedIdx - 1 < 0) {
+      this.selectedIdx = this.filteredBlogList.length - 1;
+      return;
+    }
+    this.selectedIdx -= 1;
+  };
+}
+const blogList = new BlogList();
 /**
  * 상태 갱신을 여기서 처리하고
  * 다른 곳에서 반영해야 함.
@@ -39,26 +81,27 @@ const handleUpdateSearchInput = (e: Event) => {
   searchList.replaceChildren();
 
   const url = new URL(window.location.href);
+  url.searchParams.delete("search");
 
-  searchData.blog
-    .filter((elem) =>
-      elem.title.toLowerCase().includes(input.value.toLowerCase()),
-    )
-    .forEach((elem) => {
-      if (!elem.htmlPath) return;
-      const newPath = elem.htmlPath;
+  blogList.setFilterBlogList(input.value);
+  blogList.filteredBlogList.forEach((elem, idx) => {
+    if (!elem.htmlPath) return;
+    const newPath = elem.htmlPath;
 
-      const searchItem = document.createElement("li");
-      const searchItemLink = document.createElement("a");
+    const searchItem = document.createElement("li");
+    const searchItemLink = document.createElement("a");
 
-      searchItemLink.href = `${newPath}${url.search}`;
+    searchItemLink.href = `${newPath}${url.search}`;
 
-      searchItemLink.innerText = elem.title;
-      searchItemLink.classList.add("search-item-link");
-      searchItem.classList.add("search-item");
-      searchItem.appendChild(searchItemLink);
-      searchList.appendChild(searchItem);
-    });
+    searchItemLink.innerText = elem.title;
+    if (idx === blogList.selectedIdx) {
+      searchItemLink.classList.add("search-item-focus");
+    }
+    searchItemLink.classList.add("search-item-link");
+    searchItem.classList.add("search-item");
+    searchItem.appendChild(searchItemLink);
+    searchList.appendChild(searchItem);
+  });
 };
 
 /**
@@ -79,7 +122,7 @@ const createSearchInput = () => {
   const searchInput = document.createElement("input");
   searchInput.id = "search-input";
   searchInput.type = "search";
-  searchInput.name = "search";
+  searchInput.name = "search-input";
   searchInput.placeholder = "Search";
   searchInput.autocomplete = "off";
 
@@ -266,14 +309,49 @@ const handlePopup = (e: KeyboardEvent) => {
     }
     case "Enter": {
       console.log("Enter");
-      break;
+      return;
     }
     case "ArrowUp": {
-      console.log("Up arrow pressed");
+      blogList.incrementIdx();
+
+      const deleteClass = document.querySelector(".search-item-focus");
+      if (deleteClass) {
+        deleteClass.classList.remove("search-item-focus");
+      }
+
+      const searchItem =
+        document.querySelectorAll<HTMLDivElement>(".search-item");
+      if (!searchItem.length) return;
+
+      searchItem.forEach((elem, idx) => {
+        if (idx === blogList.selectedIdx) {
+          const link = elem.querySelector(".search-item-link");
+          if (!link) return;
+          link.classList.add("search-item-focus");
+        }
+      });
+
       break;
     }
     case "ArrowDown": {
-      console.log("Down arrow pressed");
+      blogList.decrementIdx();
+
+      const deleteClass = document.querySelector(".search-item-focus");
+      if (!deleteClass) return;
+      deleteClass.classList.remove("search-item-focus");
+
+      const searchItem =
+        document.querySelectorAll<HTMLDivElement>(".search-item");
+      if (!searchItem.length) return;
+
+      searchItem.forEach((elem, idx) => {
+        if (idx === blogList.selectedIdx) {
+          const link = elem.querySelector(".search-item-link");
+          if (!link) return;
+          link.classList.add("search-item-focus");
+        }
+      });
+
       break;
     }
   }
@@ -297,6 +375,7 @@ const search = async (data: Data) => {
       }
     });
   });
+  blogList.init(data.blog);
 
   window.addEventListener("keydown", handlePopup);
 
