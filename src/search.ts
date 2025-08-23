@@ -43,18 +43,18 @@ class BlogList {
     this.selectedIdx = 0;
   };
   incrementIdx = () => {
-    if (this.selectedIdx + 1 > this.filteredBlogList.length - 1) {
-      this.resetIdx();
-      return;
-    }
-    this.selectedIdx += 1;
-  };
-  decrementIdx = () => {
     if (this.selectedIdx - 1 < 0) {
       this.selectedIdx = this.filteredBlogList.length - 1;
       return;
     }
     this.selectedIdx -= 1;
+  };
+  decrementIdx = () => {
+    if (this.selectedIdx + 1 > this.filteredBlogList.length - 1) {
+      this.resetIdx();
+      return;
+    }
+    this.selectedIdx += 1;
   };
 }
 const blogList = new BlogList();
@@ -208,6 +208,29 @@ const createPopup = () => {
   const searchList = document.createElement("ul");
   searchList.id = SEARCH_BLOG_LIST;
 
+  const searchInputValue = url.searchParams.get("search-input");
+  if (searchInputValue) {
+    blogList.setFilterBlogList(searchInputValue);
+    blogList.filteredBlogList.forEach((elem, idx) => {
+      if (!elem.htmlPath) return;
+      const newPath = elem.htmlPath;
+
+      const searchItem = document.createElement("li");
+      const searchItemLink = document.createElement("a");
+
+      searchItemLink.href = `${newPath}${url.search}`;
+
+      searchItemLink.innerText = elem.title;
+      if (idx === blogList.selectedIdx) {
+        searchItemLink.classList.add("search-item-focus");
+      }
+      searchItemLink.classList.add("search-item-link");
+      searchItem.classList.add("search-item");
+      searchItem.appendChild(searchItemLink);
+      searchList.appendChild(searchItem);
+    });
+  }
+
   popupContainer.appendChild(searchList);
 
   popupWrapper.appendChild(popupContainer);
@@ -320,13 +343,20 @@ const handlePopup = (e: KeyboardEvent) => {
 
       const searchInput =
         document.querySelector<HTMLInputElement>(`#search-input`);
-      if (!searchInput) return;
+      if (
+        // input 필터링된 목록이 비어있을 경우
+        !blogList.filteredBlogList.length ||
+        // html 경로가 없는 경우 및 타입 선언 이슈
+        !selectedBlogList.htmlPath ||
+        //
+        !searchInput ||
+        !searchInput.value
+      )
+        return;
 
-      // search-input
       const url = new URL(window.location.href);
       url.searchParams.delete("search");
       url.searchParams.set("search-input", searchInput.value);
-      if (!selectedBlogList.htmlPath) return;
       url.pathname = selectedBlogList.htmlPath;
 
       // 최종 이동
