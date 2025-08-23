@@ -198,6 +198,7 @@ const blogList = (metaObjects: MetaObject[]) => {
         tagLink.innerText = `#${tag}`;
 
         const url = new URL(window.location.href);
+        url.searchParams.delete("search");
         const values = url.searchParams.getAll("tags");
 
         if (values.includes(tag)) {
