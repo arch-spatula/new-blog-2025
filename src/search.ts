@@ -3,7 +3,6 @@
  *
  * @todo 날짜 범위 표시도 가능해야 함.
  * @todo 키보드 입력은 SPA로 data.json을 활용
- * @todo enter 하면 목록 첫번째로 자동 이동
  * @todo url에 입력 내용 보존
  */
 
@@ -91,7 +90,15 @@ const handleUpdateSearchInput = (e: Event) => {
     const searchItem = document.createElement("li");
     const searchItemLink = document.createElement("a");
 
-    searchItemLink.href = `${newPath}${url.search}`;
+    if (url.pathname === "/") {
+      searchItemLink.href = `${newPath}${url.search}`;
+    } else {
+      let pathBuilder = "";
+      url.pathname.split("/").forEach(() => {
+        pathBuilder += "../";
+      });
+      searchItemLink.href = `${pathBuilder}${newPath}${url.search}`;
+    }
 
     searchItemLink.innerText = elem.title;
     if (idx === blogList.selectedIdx) {
@@ -209,6 +216,8 @@ const createPopup = () => {
   searchList.id = SEARCH_BLOG_LIST;
 
   const searchInputValue = url.searchParams.get("search-input");
+  url.searchParams.delete("search");
+
   if (searchInputValue) {
     blogList.setFilterBlogList(searchInputValue);
     blogList.filteredBlogList.forEach((elem, idx) => {
@@ -218,7 +227,15 @@ const createPopup = () => {
       const searchItem = document.createElement("li");
       const searchItemLink = document.createElement("a");
 
-      searchItemLink.href = `${newPath}${url.search}`;
+      if (url.pathname === "/") {
+        searchItemLink.href = `${newPath}${url.search}`;
+      } else {
+        let pathBuilder = "";
+        url.pathname.split("/").forEach(() => {
+          pathBuilder += "../";
+        });
+        searchItemLink.href = `${pathBuilder}${newPath}${url.search}`;
+      }
 
       searchItemLink.innerText = elem.title;
       if (idx === blogList.selectedIdx) {
