@@ -190,6 +190,10 @@ input[type="search"]::-webkit-search-results-decoration {
   color: #6cb6ff;
   border: solid 1px #6cb6ff;
 }
+#popup-container #search-blog-list .search-item .search-item-focus {
+  color: #6cb6ff;
+  border: solid 1px #6cb6ff;
+}
 
 #search-form:has(#search-input:hover) {
   border: solid 1px #6cb6ff;
