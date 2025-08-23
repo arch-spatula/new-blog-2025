@@ -111,7 +111,9 @@ const handleUpdateSearchInput = (e: Event) => {
 const createSearchInput = () => {
   const searchForm = document.createElement("form");
   searchForm.id = "search-form";
-
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
   const searchIcon = document.createElement("img");
   searchIcon.id = "search-icon";
   searchIcon.src = "/search.svg";
@@ -125,6 +127,12 @@ const createSearchInput = () => {
   searchInput.name = "search-input";
   searchInput.placeholder = "Search";
   searchInput.autocomplete = "off";
+
+  const url = new URL(window.location.href);
+  const searchInputvalue = url.searchParams.get("search-input");
+  if (searchInputvalue) {
+    searchInput.value = searchInputvalue;
+  }
 
   searchInput.addEventListener("input", handleUpdateSearchInput);
 
@@ -308,8 +316,23 @@ const handlePopup = (e: KeyboardEvent) => {
       break;
     }
     case "Enter": {
-      console.log("Enter");
-      return;
+      const selectedBlogList = blogList.selectedBlogList();
+
+      const searchInput =
+        document.querySelector<HTMLInputElement>(`#search-input`);
+      if (!searchInput) return;
+
+      // search-input
+      const url = new URL(window.location.href);
+      url.searchParams.delete("search");
+      url.searchParams.set("search-input", searchInput.value);
+      if (!selectedBlogList.htmlPath) return;
+      url.pathname = selectedBlogList.htmlPath;
+
+      // 최종 이동
+      window.location.href = url.toString();
+
+      break;
     }
     case "ArrowUp": {
       blogList.incrementIdx();
