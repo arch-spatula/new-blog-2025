@@ -38,14 +38,25 @@ const handleUpdateSearchInput = (e: Event) => {
 
   searchList.replaceChildren();
 
+  const url = new URL(window.location.href);
+
   searchData.blog
     .filter((elem) =>
       elem.title.toLowerCase().includes(input.value.toLowerCase()),
     )
     .forEach((elem) => {
+      if (!elem.htmlPath) return;
+      const newPath = elem.htmlPath;
+
       const searchItem = document.createElement("li");
-      searchItem.innerText = elem.title;
+      const searchItemLink = document.createElement("a");
+
+      searchItemLink.href = `${newPath}${url.search}`;
+
+      searchItemLink.innerText = elem.title;
+      searchItemLink.classList.add("search-item-link");
       searchItem.classList.add("search-item");
+      searchItem.appendChild(searchItemLink);
       searchList.appendChild(searchItem);
     });
 };
@@ -70,6 +81,7 @@ const createSearchInput = () => {
   searchInput.type = "search";
   searchInput.name = "search";
   searchInput.placeholder = "Search";
+  searchInput.autocomplete = "off";
 
   searchInput.addEventListener("input", handleUpdateSearchInput);
 
