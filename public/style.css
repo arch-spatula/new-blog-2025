@@ -151,11 +151,44 @@ body {
   color: #212830;
   padding: 6px 12px;
   font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.search-item {
+/* Chrome, Safari, Edge (WebKit) CSS search 삭제버튼 제거 */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+#popup-container #search-blog-list {
+  padding: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#popup-container #search-blog-list .search-item {
   text-decoration: none;
   list-style-type: none;
+  display: flex;
+}
+
+#popup-container #search-blog-list .search-item .search-item-link {
+  all: unset;
+  width: 100%;
+  color: #9198a1;
+  border: solid 1px #9198a1;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+#popup-container #search-blog-list .search-item .search-item-link:hover {
+  color: #6cb6ff;
+  border: solid 1px #6cb6ff;
 }
 
 #search-form:has(#search-input:hover) {
