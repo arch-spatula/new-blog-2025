@@ -68,6 +68,7 @@ const nav = () => {
   ul.appendChild(popupBtnWrapper);
 
   const github = document.createElement("li");
+  github.classList.add("github-link");
   const githubNewTabLink = document.createElement("a");
   githubNewTabLink.href = "https://github.com";
   githubNewTabLink.target = "_blank";
