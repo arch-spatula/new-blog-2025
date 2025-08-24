@@ -3,11 +3,10 @@
  *
  * @todo 날짜 범위 표시도 가능해야 함.
  * @todo 키보드 입력은 SPA로 data.json을 활용
- * @todo enter 하면 목록 첫번째로 자동 이동
  * @todo url에 입력 내용 보존
  */
 
-import type { Data } from "../types/types";
+import type { Data, MetaObject } from "../types/types";
 import PopupBus from "./search-popup-bus";
 
 let popupType: "none" | "search" = "none";
@@ -16,6 +15,48 @@ const tagMap = new Map<string, number>();
 const SEARCH_BLOG_LIST = `search-blog-list`;
 const SEARCH_TAG_LIST = `search-tag-list`;
 
+// let selectedSearchIdx = 0;
+class BlogList {
+  selectedIdx: number;
+  private allBlogList: MetaObject[];
+  filteredBlogList: MetaObject[];
+  constructor() {
+    this.selectedIdx = 0;
+    this.allBlogList = [];
+    this.filteredBlogList = [];
+  }
+  init = (blogList: MetaObject[]) => {
+    this.allBlogList = blogList;
+  };
+  setFilterBlogList = (input: string) => {
+    const filteredBlogList = this.allBlogList.filter((elem) => {
+      return elem.title.toLowerCase().includes(input.toLowerCase());
+    });
+    this.filteredBlogList = filteredBlogList;
+    return this.filteredBlogList;
+  };
+  selectedBlogList = () => {
+    return this.filteredBlogList[this.selectedIdx];
+  };
+  resetIdx = () => {
+    this.selectedIdx = 0;
+  };
+  incrementIdx = () => {
+    if (this.selectedIdx - 1 < 0) {
+      this.selectedIdx = this.filteredBlogList.length - 1;
+      return;
+    }
+    this.selectedIdx -= 1;
+  };
+  decrementIdx = () => {
+    if (this.selectedIdx + 1 > this.filteredBlogList.length - 1) {
+      this.resetIdx();
+      return;
+    }
+    this.selectedIdx += 1;
+  };
+}
+const blogList = new BlogList();
 /**
  * 상태 갱신을 여기서 처리하고
  * 다른 곳에서 반영해야 함.
@@ -38,16 +79,36 @@ const handleUpdateSearchInput = (e: Event) => {
 
   searchList.replaceChildren();
 
-  searchData.blog
-    .filter((elem) =>
-      elem.title.toLowerCase().includes(input.value.toLowerCase()),
-    )
-    .forEach((elem) => {
-      const searchItem = document.createElement("li");
-      searchItem.innerText = elem.title;
-      searchItem.classList.add("search-item");
-      searchList.appendChild(searchItem);
-    });
+  const url = new URL(window.location.href);
+  url.searchParams.delete("search");
+
+  blogList.setFilterBlogList(input.value);
+  blogList.filteredBlogList.forEach((elem, idx) => {
+    if (!elem.htmlPath) return;
+    const newPath = elem.htmlPath;
+
+    const searchItem = document.createElement("li");
+    const searchItemLink = document.createElement("a");
+
+    if (url.pathname === "/") {
+      searchItemLink.href = `${newPath}${url.search}`;
+    } else {
+      let pathBuilder = "";
+      url.pathname.split("/").forEach(() => {
+        pathBuilder += "../";
+      });
+      searchItemLink.href = `${pathBuilder}${newPath}${url.search}`;
+    }
+
+    searchItemLink.innerText = elem.title;
+    if (idx === blogList.selectedIdx) {
+      searchItemLink.classList.add("search-item-focus");
+    }
+    searchItemLink.classList.add("search-item-link");
+    searchItem.classList.add("search-item");
+    searchItem.appendChild(searchItemLink);
+    searchList.appendChild(searchItem);
+  });
 };
 
 /**
@@ -57,7 +118,9 @@ const handleUpdateSearchInput = (e: Event) => {
 const createSearchInput = () => {
   const searchForm = document.createElement("form");
   searchForm.id = "search-form";
-
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
   const searchIcon = document.createElement("img");
   searchIcon.id = "search-icon";
   searchIcon.src = "/search.svg";
@@ -68,8 +131,15 @@ const createSearchInput = () => {
   const searchInput = document.createElement("input");
   searchInput.id = "search-input";
   searchInput.type = "search";
-  searchInput.name = "search";
+  searchInput.name = "search-input";
   searchInput.placeholder = "Search";
+  searchInput.autocomplete = "off";
+
+  const url = new URL(window.location.href);
+  const searchInputvalue = url.searchParams.get("search-input");
+  if (searchInputvalue) {
+    searchInput.value = searchInputvalue;
+  }
 
   searchInput.addEventListener("input", handleUpdateSearchInput);
 
@@ -144,6 +214,39 @@ const createPopup = () => {
 
   const searchList = document.createElement("ul");
   searchList.id = SEARCH_BLOG_LIST;
+
+  const searchInputValue = url.searchParams.get("search-input");
+  url.searchParams.delete("search");
+
+  if (searchInputValue) {
+    blogList.setFilterBlogList(searchInputValue);
+    blogList.filteredBlogList.forEach((elem, idx) => {
+      if (!elem.htmlPath) return;
+      const newPath = elem.htmlPath;
+
+      const searchItem = document.createElement("li");
+      const searchItemLink = document.createElement("a");
+
+      if (url.pathname === "/") {
+        searchItemLink.href = `${newPath}${url.search}`;
+      } else {
+        let pathBuilder = "";
+        url.pathname.split("/").forEach(() => {
+          pathBuilder += "../";
+        });
+        searchItemLink.href = `${pathBuilder}${newPath}${url.search}`;
+      }
+
+      searchItemLink.innerText = elem.title;
+      if (idx === blogList.selectedIdx) {
+        searchItemLink.classList.add("search-item-focus");
+      }
+      searchItemLink.classList.add("search-item-link");
+      searchItem.classList.add("search-item");
+      searchItem.appendChild(searchItemLink);
+      searchList.appendChild(searchItem);
+    });
+  }
 
   popupContainer.appendChild(searchList);
 
@@ -253,15 +356,72 @@ const handlePopup = (e: KeyboardEvent) => {
       break;
     }
     case "Enter": {
-      console.log("Enter");
+      const selectedBlogList = blogList.selectedBlogList();
+
+      const searchInput =
+        document.querySelector<HTMLInputElement>(`#search-input`);
+      if (
+        // input 필터링된 목록이 비어있을 경우
+        !blogList.filteredBlogList.length ||
+        // html 경로가 없는 경우 및 타입 선언 이슈
+        !selectedBlogList.htmlPath ||
+        //
+        !searchInput ||
+        !searchInput.value
+      )
+        return;
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("search");
+      url.searchParams.set("search-input", searchInput.value);
+      url.pathname = selectedBlogList.htmlPath;
+
+      // 최종 이동
+      window.location.href = url.toString();
+
       break;
     }
     case "ArrowUp": {
-      console.log("Up arrow pressed");
+      blogList.incrementIdx();
+
+      const deleteClass = document.querySelector(".search-item-focus");
+      if (deleteClass) {
+        deleteClass.classList.remove("search-item-focus");
+      }
+
+      const searchItem =
+        document.querySelectorAll<HTMLDivElement>(".search-item");
+      if (!searchItem.length) return;
+
+      searchItem.forEach((elem, idx) => {
+        if (idx === blogList.selectedIdx) {
+          const link = elem.querySelector(".search-item-link");
+          if (!link) return;
+          link.classList.add("search-item-focus");
+        }
+      });
+
       break;
     }
     case "ArrowDown": {
-      console.log("Down arrow pressed");
+      blogList.decrementIdx();
+
+      const deleteClass = document.querySelector(".search-item-focus");
+      if (!deleteClass) return;
+      deleteClass.classList.remove("search-item-focus");
+
+      const searchItem =
+        document.querySelectorAll<HTMLDivElement>(".search-item");
+      if (!searchItem.length) return;
+
+      searchItem.forEach((elem, idx) => {
+        if (idx === blogList.selectedIdx) {
+          const link = elem.querySelector(".search-item-link");
+          if (!link) return;
+          link.classList.add("search-item-focus");
+        }
+      });
+
       break;
     }
   }
@@ -285,6 +445,7 @@ const search = async (data: Data) => {
       }
     });
   });
+  blogList.init(data.blog);
 
   window.addEventListener("keydown", handlePopup);
 
