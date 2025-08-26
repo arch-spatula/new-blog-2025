@@ -56,6 +56,7 @@ class BlogList {
     this.selectedIdx += 1;
   };
 }
+
 const blogList = new BlogList();
 /**
  * 상태 갱신을 여기서 처리하고
@@ -100,7 +101,17 @@ const handleUpdateSearchInput = (e: Event) => {
       searchItemLink.href = `${pathBuilder}${newPath}${url.search}`;
     }
 
-    searchItemLink.innerText = elem.title;
+    const regex = new RegExp(`(${input.value})`, "i"); // i 플래그 = 대소문자 무시
+    const highlightSplitTitle = elem.title.split(regex).filter(Boolean); // 빈 문자열 제거
+    highlightSplitTitle.forEach((text) => {
+      const span = document.createElement("span");
+      span.innerText = text;
+      if (text.toLowerCase() === input.value.toLowerCase()) {
+        span.classList.add("search-highlight");
+      }
+      searchItemLink.appendChild(span);
+    });
+
     if (idx === blogList.selectedIdx) {
       searchItemLink.classList.add("search-item-focus");
     }

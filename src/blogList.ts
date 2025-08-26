@@ -169,6 +169,7 @@ const blogList = (metaObjects: MetaObject[]) => {
     if (!metaObject.htmlPath) return;
     const newPath = metaObject.htmlPath;
 
+    url.searchParams.delete("search");
     blogLink.innerText = metaObject.title;
     blogLink.href = `${newPath}${url.search}`;
 
