@@ -117,6 +117,12 @@ body {
   text-decoration: none;
 }
 
+#search-popup {
+  position: fixed;
+  top: 25vh;
+  z-index: 2;
+}
+
 #popup-container {
   position: absolute;
   width: 50vw;
@@ -256,7 +262,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 #overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.3);
