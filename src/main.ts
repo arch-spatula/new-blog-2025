@@ -3,6 +3,7 @@ import blogList from "./blogList";
 import clipboard from "./clipboard";
 import nav from "./nav";
 import search from "./search";
+import toc from "./toc";
 
 const main = async () => {
   const app = document.querySelector<HTMLDivElement>("#app");
@@ -10,7 +11,6 @@ const main = async () => {
   const data: Data = await res.json();
 
   await search(data);
-  clipboard();
   nav();
 
   if (!app) return;
@@ -57,7 +57,11 @@ const main = async () => {
     notFound.appendChild(goHome);
 
     app.appendChild(notFound);
+    return;
   }
+
+  clipboard();
+  await toc(data);
 };
 
 main();
